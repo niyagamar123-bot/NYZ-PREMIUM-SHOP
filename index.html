@@ -13,7 +13,7 @@ button:hover{background:#ff8800}
 h1{color:#ff6600;font-size:32px;text-align:center}
 .footer{background:#1a1a1a;padding:20px;margin-top:40px;border-radius:15px;text-align:left;max-width:500px;margin-left:auto;margin-right:auto}
 .number{font-size:22px;color:#00ff88;font-weight:bold}
-.pay-box{background:#222;padding:12px;border-radius:10px;margin:10px 0}
+.support-box{background:#222;border:2px solid #ff6600;padding:15px;border-radius:10px;margin:15px 0}
 img{border-radius:10px;width:100%;margin-bottom:10px}
 .desc{font-size:14px;color:#ccc;margin:10px 0;line-height:1.6}
 </style>
@@ -27,10 +27,12 @@ img{border-radius:10px;width:100%;margin-bottom:10px}
 <p id="status" style="color:lime;font-size:18px;text-align:center"></p>
 
 <div class="footer">
-<h3>📞 যোগাযোগ ও পেমেন্ট</h3>
-<div class="pay-box"><b>বিকাশ:</b> <span class="number">01908807313</span></div>
-<div class="pay-box"><b>নগদ:</b> <span class="number">01908807313</span></div>
-<p><b>WhatsApp:</b> <span class="number">01908807313</span></p>
+<h3>🛡️ সাপোর্ট</h3>
+<div class="support-box">
+<p><b>কোনো সমস্যা হলে যোগাযোগ করুন:</b></p>
+<p><b>Support Admin WhatsApp:</b> <a href="https://wa.me/8801965067388" target="_blank" style="color:#00ff88;font-size:20px">01965067388</a></p>
+<p style="font-size:13px;color:#aaa">অর্ডার, পেমেন্ট বা অন্য সমস্যার জন্য এই নাম্বারে মেসেজ দিন</p>
+</div>
 </div>
 
 <script type="module">
@@ -39,8 +41,9 @@ import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebas
 const firebaseConfig = {apiKey: "AIzaSyAeL4HVPaea7ZCfI3jg1HFcJlv1nxnOm8g", authDomain: "aura-premium-shop.firebaseapp.com", databaseURL: "https://aura-premium-shop-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "aura-premium-shop", storageBucket: "aura-premium-shop.firebasestorage.app", messagingSenderId: "716630218001", appId: "1:716630218001:web:74abbe23e91048877568b0"};
 const app = initializeApp(firebaseConfig); const db = getDatabase(app);
 
-// তোমার WhatsApp নাম্বার এখানে বসাও। 88 দিয়ে শুরু
-const WHATSAPP_NUMBER = "8801908807313"; 
+// নাম্বার 2টা। 88 দিয়ে শুরু
+const ORDER_WHATSAPP = "8801908807313"; // অর্ডার এই নাম্বারে যাবে
+const SUPPORT_WHATSAPP = "8801965067388"; // সাপোর্ট এই নাম্বারে
 
 onValue(ref(db, 'products'), (snapshot) => {
 const productsDiv = document.getElementById('products'); productsDiv.innerHTML = "";
@@ -52,17 +55,19 @@ window.order = function(id, item, price){
 const mobile = document.getElementById(`cmobile-${id}`).value; 
 if(mobile === "" || mobile.length < 11){ alert("সঠিক মোবাইল নাম্বার দিন"); return; }
 
-// 1. Firebase এ Save হবে
+// 1. Firebase এ Save
 push(ref(db, 'orders'), {item: item, price: price, mobile: mobile, time: new Date().toLocaleString("bn-BD")});
 
-// 2. Success মেসেজ দেখাবে
-document.getElementById('status').innerText = "✅ অর্ডার সফল! WhatsApp এ রিডাইরেক্ট হচ্ছে..."; 
+// 2. Success মেসেজ
+document.getElementById('status').innerText = "✅ অর্ডার সফল! 2 সেকেন্ডে WhatsApp খুলবে"; 
 document.getElementById(`cmobile-${id}`).value = ""; 
 
-// 3. Direct WhatsApp এ নিয়ে যাবে
-let message = `নতুন অর্ডার 🔥%0A%0AProduct: ${item}%0APrice: ${price}TK%0AMobile: ${mobile}`;
-let whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
-setTimeout(() => { window.open(whatsappURL, '_blank'); }, 1500);
+// 3. Auto WhatsApp এ মেসেজ - Main Admin এর কাছে
+let message = `নতুন অর্ডার এসেছে 🔥%0A%0AProduct: ${item}%0APrice: ${price}TK%0ACustomer Mobile: ${mobile}%0ATime: ${new Date().toLocaleString("bn-BD")}`;
+let whatsappURL = `https://wa.me/${ORDER_WHATSAPP}?text=${message}`;
+
+// 2 সেকেন্ড পর অটো রিডাইরেক্ট
+setTimeout(() => { window.location.href = whatsappURL; }, 2000);
 
 }
 </script>
