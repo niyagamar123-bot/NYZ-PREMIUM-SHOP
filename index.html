@@ -7,68 +7,96 @@
 <style>
 body{font-family:'Arial',sans-serif;background:#0f0f0f;color:white;text-align:center;padding:20px;margin:0}
 .product{background:#1a1a1a;padding:20px;margin:15px;border-radius:15px;display:inline-block;width:300px;box-shadow:0 0 10px #ff660044;vertical-align:top;text-align:left}
-input,button{padding:12px;margin:8px;border-radius:8px;border:none;width:90%;font-size:16px}
+input,button,textarea{padding:12px;margin:8px;border-radius:8px;border:none;width:90%;font-size:16px}
+textarea{height:60px;resize:vertical}
 button{background:#ff6600;color:white;cursor:pointer;font-weight:bold}
 button:hover{background:#ff8800}
 h1{color:#ff6600;font-size:32px;text-align:center}
 .footer{background:#1a1a1a;padding:20px;margin-top:40px;border-radius:15px;text-align:left;max-width:500px;margin-left:auto;margin-right:auto}
-.number{font-size:22px;color:#00ff88;font-weight:bold}
-.support-box{background:#222;border:2px solid #ff6600;padding:15px;border-radius:10px;margin:15px 0}
+.support-box{background:#222;border:2px solid #ff6600;padding:15px;border-radius:10px;margin:15px 0;cursor:pointer;text-align:center}
 img{border-radius:10px;width:100%;margin-bottom:10px}
 .desc{font-size:14px;color:#ccc;margin:10px 0;line-height:1.6}
+.popup{position:fixed;top:0;left:0;width:100%;height:100%;background:#000c;display:none;justify-content:center;align-items:center;z-index:999} /* এখানে #000c ঠিক করলাম */
+.popup-content{background:#1a1a1a;padding:20px;border-radius:15px;width:90%;max-width:400px;text-align:left}
+.popup-content button{width:100%;margin:8px 0;background:#333}
+.close{float:right;color:red;font-size:24px;cursor:pointer}
 </style>
 </head>
 <body> 
-
 <h1>🔥 AURA SHOP 🔥</h1>
-<p style="text-align:center">আপনার পছন্দের সব প্রোডাক্ট - 24/7 Service</p>
-
-<div id="products"><p style="text-align:center">Loading products...</p></div>
+<div id="products"><p style="text-align:center">Loading...</p></div>
 <p id="status" style="color:lime;font-size:18px;text-align:center"></p>
 
 <div class="footer">
-<h3>🛡️ সাপোর্ট</h3>
-<div class="support-box">
-<p><b>কোনো সমস্যা হলে যোগাযোগ করুন:</b></p>
-<p><b>Support Admin WhatsApp:</b> <a href="https://wa.me/8801965067388" target="_blank" style="color:#00ff88;font-size:20px">01965067388</a></p>
-<p style="font-size:13px;color:#aaa">অর্ডার, পেমেন্ট বা অন্য সমস্যার জন্য এই নাম্বারে মেসেজ দিন</p>
+<h3>🛡️ সাপোর্ট সেন্টার</h3>
+<div class="support-box" onclick="openSupport()"><b>কোনো সমস্যা? এখানে ক্লিক করুন</b></div>
 </div>
-</div>
+
+<div id="supportPopup" class="popup"><div class="popup-content">
+<span class="close" onclick="closeSupport()">&times;</span>
+<h3>সাপোর্ট টপিক সিলেক্ট করুন</h3>
+<button onclick="goSupport('Payment Issue')">💳 Payment Issue</button>
+<button onclick="goSupport('Delivery Issue')">🚚 Delivery Issue</button>
+<button onclick="goSupport('Product Not Working')">⚙️ Product Not Working</button>
+<button onclick="goSupport('Refund Request')">💰 Refund Request</button>
+<button onclick="goSupport('Other Problem')">❓ Other Problem</button>
+</div></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, push, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 const firebaseConfig = {apiKey: "AIzaSyAeL4HVPaea7ZCfI3jg1HFcJlv1nxnOm8g", authDomain: "aura-premium-shop.firebaseapp.com", databaseURL: "https://aura-premium-shop-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "aura-premium-shop", storageBucket: "aura-premium-shop.firebasestorage.app", messagingSenderId: "716630218001", appId: "1:716630218001:web:74abbe23e91048877568b0"};
 const app = initializeApp(firebaseConfig); const db = getDatabase(app);
 
-// নাম্বার 2টা। 88 দিয়ে শুরু
-const ORDER_WHATSAPP = "8801908807313"; // অর্ডার এই নাম্বারে যাবে
-const SUPPORT_WHATSAPP = "8801965067388"; // সাপোর্ট এই নাম্বারে
+const ORDER_WHATSAPP = "8801908807313"; // Main Admin
+const SUPPORT_WHATSAPP = "8801965067388"; // Support
 
 onValue(ref(db, 'products'), (snapshot) => {
 const productsDiv = document.getElementById('products'); productsDiv.innerHTML = "";
 if(snapshot.exists()){ snapshot.forEach((child) => { const p = child.val(); let imgTag = p.img ? `<img src="${p.img}">` : '';
-productsDiv.innerHTML += `<div class="product">${imgTag}<h2>${p.name}</h2><p style="font-size:20px;color:#ff6600">দাম: ${p.price} TK</p><p class="desc"><b>বিবরণ:</b><br>${p.desc || 'কোনো বিবরণ নেই'}</p><input id="cmobile-${child.key}" type="tel" placeholder="আপনার মোবাইল নাম্বার 01XXXXXXXXX"><button onclick="order('${child.key}','${p.name}', ${p.price})">Order Now</button></div>`; }); } 
+productsDiv.innerHTML += `<div class="product">${imgTag}<h2>${p.name}</h2><p style="font-size:20px;color:#ff6600">দাম: ${p.price} TK</p><p class="desc"><b>বিবরণ:</b><br>${p.desc || ''}</p>
+<input id="cname-${child.key}" type="text" placeholder="আপনার নাম">
+<input id="cmobile-${child.key}" type="tel" placeholder="মোবাইল 01XXXXXXXXX">
+<textarea id="caddr-${child.key}" placeholder="আপনার ঠিকানা"></textarea>
+<button onclick="order('${child.key}','${p.name}', ${p.price})">Order Now</button></div>`; }); } 
 else { productsDiv.innerHTML = "<p style='color:red;text-align:center'>শীঘ্রই প্রোডাক্ট আসবে</p>"; } });
 
-window.order = function(id, item, price){ 
+window.order = async function(id, item, price){ 
+const name = document.getElementById(`cname-${id}`).value; 
 const mobile = document.getElementById(`cmobile-${id}`).value; 
-if(mobile === "" || mobile.length < 11){ alert("সঠিক মোবাইল নাম্বার দিন"); return; }
+const addr = document.getElementById(`caddr-${id}`).value;
+if(name === "" || mobile === "" || addr === ""){ alert("নাম, মোবাইল, ঠিকানা সব দিন"); return; }
 
-// 1. Firebase এ Save
-push(ref(db, 'orders'), {item: item, price: price, mobile: mobile, time: new Date().toLocaleString("bn-BD")});
-
-// 2. Success মেসেজ
-document.getElementById('status').innerText = "✅ অর্ডার সফল! 2 সেকেন্ডে WhatsApp খুলবে"; 
+push(ref(db, 'orders'), {name: name, item: item, price: price, mobile: mobile, address: addr, time: new Date().toLocaleString("bn-BD")});
+document.getElementById('status').innerText = "✅ অর্ডার সফল! সকল এডমিনকে নোটিফাই করা হচ্ছে..."; 
+document.getElementById(`cname-${id}`).value = ""; 
 document.getElementById(`cmobile-${id}`).value = ""; 
+document.getElementById(`caddr-${id}`).value = ""; 
 
-// 3. Auto WhatsApp এ মেসেজ - Main Admin এর কাছে
-let message = `নতুন অর্ডার এসেছে 🔥%0A%0AProduct: ${item}%0APrice: ${price}TK%0ACustomer Mobile: ${mobile}%0ATime: ${new Date().toLocaleString("bn-BD")}`;
-let whatsappURL = `https://wa.me/${ORDER_WHATSAPP}?text=${message}`;
+let message = `নতুন অর্ডার 🔥%0A%0AName: ${name}%0AProduct: ${item}%0APrice: ${price}TK%0AMobile: ${mobile}%0AAddress: ${addr}%0ATime: ${new Date().toLocaleString("bn-BD")}`;
 
-// 2 সেকেন্ড পর অটো রিডাইরেক্ট
-setTimeout(() => { window.location.href = whatsappURL; }, 2000);
+// 1. Main Admin কে আগে পাঠাও
+window.open(`https://wa.me/${ORDER_WHATSAPP}?text=${message}`, '_blank');
 
+// 2. Firebase থেকে সব Sub Admin নিয়ে তাদেরকেও পাঠাও 1 সেকেন্ড পর পর
+const adminsSnap = await get(ref(db, 'admins'));
+if(adminsSnap.exists()){
+  let i = 1;
+  adminsSnap.forEach(c=>{
+    let adminMobile = c.val().mobile.replace(/^0/, '88'); // 01 কে 88 বানাবে
+    setTimeout(()=>{ window.open(`https://wa.me/${adminMobile}?text=${message}`, '_blank'); }, i * 1000);
+    i++;
+  })
+}
+}
+
+// Support
+window.openSupport = function(){ document.getElementById('supportPopup').style.display = 'flex'; }
+window.closeSupport = function(){ document.getElementById('supportPopup').style.display = 'none'; }
+window.goSupport = function(topic){
+let message = `Support Request%0A%0ATopic: ${topic}%0A%0Aআমার সমস্যাটি বিস্তারিত লিখুন:`;
+window.open(`https://wa.me/${SUPPORT_WHATSAPP}?text=${message}`, '_blank');
+closeSupport();
 }
 </script>
 </body>
