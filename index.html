@@ -33,7 +33,7 @@ img{border-radius:10px;width:100%;margin-bottom:10px}
 <p><b>WhatsApp:</b> <span class="number">01908807313</span></p>
 <p><b>Telegram:</b> <span class="number">@niyaz_official</span></p>
 <hr style="border-color:#333;">
-<p style="font-size:14px;color:#aaa;"><b>অর্ডার করার নিয়ম:</b><br>1. প্রোডাক্ট সিলেক্ট করে নাম + ঠিকানা দিন<br>2. Order Now চাপুন<br>3. বিকাশ/নগদে পেমেন্ট করুন</p>
+<p style="font-size:14px;color:#aaa;"><b>অর্ডার করার নিয়ম:</b><br>1. শুধু মোবাইল নাম্বার দিন<br>2. Order Now চাপুন<br>3. আমরা কল/WhatsApp এ যোগাযোগ করবো</p>
 </div>
 
 <script type="module">
@@ -45,13 +45,14 @@ const app = initializeApp(firebaseConfig); const db = getDatabase(app);
 onValue(ref(db, 'products'), (snapshot) => {
 const productsDiv = document.getElementById('products'); productsDiv.innerHTML = "";
 if(snapshot.exists()){ snapshot.forEach((child) => { const p = child.val(); let imgTag = p.img ? `<img src="${p.img}">` : '';
-productsDiv.innerHTML += `<div class="product">${imgTag}<h2>${p.name}</h2><p style="font-size:20px;color:#ff6600">দাম: ${p.price} TK</p><p class="desc"><b>বিবরণ:</b><br>${p.desc || 'কোনো বিবরণ নেই'}</p><input id="cname-${child.key}" placeholder="আপনার নাম"><input id="caddr-${child.key}" placeholder="ঠিকানা + মোবাইল"><button onclick="order('${child.key}','${p.name}', ${p.price})">Order Now</button></div>`; }); } 
+productsDiv.innerHTML += `<div class="product">${imgTag}<h2>${p.name}</h2><p style="font-size:20px;color:#ff6600">দাম: ${p.price} TK</p><p class="desc"><b>বিবরণ:</b><br>${p.desc || 'কোনো বিবরণ নেই'}</p><input id="cmobile-${child.key}" type="tel" placeholder="আপনার মোবাইল নাম্বার 01XXXXXXXXX"><button onclick="order('${child.key}','${p.name}', ${p.price})">Order Now</button></div>`; }); } 
 else { productsDiv.innerHTML = "<p style='color:red;text-align:center'>শীঘ্রই প্রোডাক্ট আসবে</p>"; } });
 
-window.order = function(id, item, price){ const name = document.getElementById(`cname-${id}`).value; const addr = document.getElementById(`caddr-${id}`).value;
-if(name === "" || addr === ""){ alert("নাম এবং ঠিকানা দিন"); return; }
-push(ref(db, 'orders'), {item: item, price: price, name: name, address: addr, time: new Date().toLocaleString("bn-BD")});
-document.getElementById('status').innerText = "✅ অর্ডার সফল! আমরা WhatsApp এ যোগাযোগ করবো"; document.getElementById(`cname-${id}`).value = ""; document.getElementById(`caddr-${id}`).value = ""; }
+window.order = function(id, item, price){ 
+const mobile = document.getElementById(`cmobile-${id}`).value; 
+if(mobile === "" || mobile.length < 11){ alert("সঠিক মোবাইল নাম্বার দিন"); return; }
+push(ref(db, 'orders'), {item: item, price: price, mobile: mobile, time: new Date().toLocaleString("bn-BD")});
+document.getElementById('status').innerText = "✅ অর্ডার সফল! আমরা শীঘ্রই কল করবো"; document.getElementById(`cmobile-${id}`).value = ""; }
 </script>
 </body>
 </html>
