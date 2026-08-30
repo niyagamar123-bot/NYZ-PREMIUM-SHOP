@@ -5,7 +5,7 @@
 <title>Support Panel - Login</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body{background:#111;color:white;font-family:'Hind Siliguri';padding:20px;display:flex;justify-content:center;align-items:center;height:90vh}
+body{background:#111;color:white;font-family:'Hind Siliguri';padding:20px;display:flex;justify-content:center;align-items:center;min-height:90vh}
 .login-box{background:#1a1a1a;padding:25px;border-radius:12px;width:100%;max-width:400px;border:2px solid #ff6600}
 input,button{padding:12px;margin:10px 0;border-radius:8px;border:none;width:100%;font-size:15px}
 button{background:#ff6600;color:white;font-weight:700;cursor:pointer}
@@ -14,7 +14,6 @@ button{background:#ff6600;color:white;font-weight:700;cursor:pointer}
 </style>
 </head>
 <body>
-
 <div class="login-box" id="login">
 <h2 style="color:#ff6600;text-align:center">🔒 Staff Login</h2>
 <input type="password" id="pass" placeholder="পাসওয়ার্ড দিন">
@@ -53,10 +52,15 @@ snapshot.forEach((child) => {
 const t = child.val();
 html += `<div class="ticket">
 <b>TicketID:</b> ${child.key}<br>
+<b>Time:</b> ${t.time || 'N/A'}<br>
 <b>Name:</b> ${t.name}<br>
 <b>Mobile:</b> ${t.mobile}<br>
+<b>Product:</b> ${t.product || 'N/A'}<br>
 <b>Problem:</b> ${t.problem}<br>
-${t.reply ? `<p style="color:#00ff88"><b>${t.repliedBy} এর রিপ্লাই:</b> ${t.reply}</p>` : ''}
+<b>TrxID:</b> ${t.trxid || '<span style="color:red">দেয় নাই</span>'}<br>
+<b>স্ক্রিনশট:</b> ${t.screenshot ? `<a href="${t.screenshot}" target="_blank" style="color:#00aaff">ছবি দেখুন</a>` : '<span style="color:red">দেয় নাই</span>'}<br>
+<b>Status:</b> ${t.status}<br>
+${t.reply ? `<p style="color:#00ff88;margin-top:10px"><b>${t.repliedBy} এর রিপ্লাই:</b> ${t.reply}</p>` : ''}
 <input id="reply-${child.key}" placeholder="রিপ্লাই লিখুন">
 <button onclick="sendReply('${child.key}')">রিপ্লাই পাঠান</button>
 </div>`;
