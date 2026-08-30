@@ -20,9 +20,11 @@ img{border-radius:10px;width:100%;margin-bottom:10px}
 .popup-content{background:#1a1a1a;padding:20px;border-radius:15px;width:90%;max-width:450px;text-align:left}
 .close{float:right;color:red;font-size:24px;cursor:pointer}
 .reply-box{background:#222;padding:10px;border-radius:8px;margin-top:10px;border-left:3px solid #00ff88}
+label{font-size:14px;color:#ccc;text-align:left;display:block;margin-top:5px}
+small{font-size:12px;color:#888}
 </style>
 </head>
-<body> 
+<body>
 <h1>🔥 AURA SHOP 🔥</h1>
 <div id="products"><p style="text-align:center">Loading...</p></div>
 <p id="status" style="color:lime;font-size:18px;text-align:center"></p>
@@ -41,6 +43,14 @@ img{border-radius:10px;width:100%;margin-bottom:10px}
 <input id="smobile" placeholder="অর্ডারের মোবাইল নাম্বার">
 <select id="sproduct"><option>প্রোডাক্ট সিলেক্ট করুন</option></select>
 <textarea id="sproblem" placeholder="সমস্যাটি বিস্তারিত লিখুন"></textarea>
+
+<label>ট্রানজেকশন আইডি / TrxID</label>
+<input type="text" id="strxid" placeholder="যেমন: 8D3A9B2C1D">
+
+<label>পেমেন্ট স্ক্রিনশটের লিংক</label>
+<input type="text" id="sscreenshotURL" placeholder="https://imgur.com/xxx.jpg">
+<small>নোট: https://imgur.com এ গিয়ে ছবি আপলোড করে লিংক দিন</small>
+
 <button onclick="submitTicket()">টিকেট সাবমিট করুন</button>
 </div></div>
 
@@ -49,35 +59,35 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getDatabase, ref, push, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 const firebaseConfig = {apiKey: "AIzaSyAeL4HVPaea7ZCfI3jg1HFcJlv1nxnOm8g", authDomain: "aura-premium-shop.firebaseapp.com", databaseURL: "https://aura-premium-shop-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "aura-premium-shop", storageBucket: "aura-premium-shop.firebasestorage.app", messagingSenderId: "716630218001", appId: "1:716630218001:web:74abbe23e91048877568b0"};
 const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-
 const ORDER_WHATSAPP = "8801908807313"; // Main Admin
 const SUPPORT_WHATSAPP = "8801965067388"; // Main Support
-
 let allProducts = [];
+
 onValue(ref(db, 'products'), (snapshot) => {
-const productsDiv = document.getElementById('products'); productsDiv.innerHTML = ""; allProducts=[];
-if(snapshot.exists()){ snapshot.forEach((child) => { const p = child.val(); p.id=child.key; allProducts.push(p);
+const productsDiv = document.getElementById('products');
+productsDiv.innerHTML = ""; allProducts=[];
+if(snapshot.exists()){
+snapshot.forEach((child) => {
+const p = child.val(); p.id=child.key; allProducts.push(p);
 let imgTag = p.img ? `<img src="${p.img}">` : '';
-productsDiv.innerHTML += `<div class="product">${imgTag}<h2>${p.name}</h2><p style="font-size:20px;color:#ff6600">দাম: ${p.price} TK</p><p class="desc"><b>বিবরণ:</b><br>${p.desc || ''}</p>
-<input id="cname-${child.key}" type="text" placeholder="আপনার নাম">
-<input id="cmobile-${child.key}" type="tel" placeholder="মোবাইল 01XXXXXXXXX">
-<textarea id="caddr-${child.key}" placeholder="আপনার ঠিকানা"></textarea>
+productsDiv.innerHTML += `<div class="product">${imgTag}<h2>${p.name}</h2><p style="font-size:20px;color:#ff6600">দাম: ${p.price} TK</p><p class="desc"><b>বিবরণ:</b><br>${p.desc || ''}</p> 
+<input id="cname-${child.key}" type="text" placeholder="আপনার নাম"> 
+<input id="cmobile-${child.key}" type="tel" placeholder="মোবাইল 01XXXXXXXXX"> 
+<textarea id="caddr-${child.key}" placeholder="আপনার ঠিকানা"></textarea> 
 <button onclick="order('${child.key}','${p.name}', ${p.price})">Order Now</button></div>`;
 let opt = document.createElement('option'); opt.value=p.name; opt.innerText=p.name; document.getElementById('sproduct').appendChild(opt);
-}); } 
-else { productsDiv.innerHTML = "<p style='color:red;text-align:center'>শীঘ্রই প্রোডাক্ট আসবে</p>"; } });
+});
+} else { productsDiv.innerHTML = "<p style='color:red;text-align:center'>শীঘ্রই প্রোডাক্ট আসবে</p>"; }
+});
 
-window.order = async function(id, item, price){ 
-const name = document.getElementById(`cname-${id}`).value; 
-const mobile = document.getElementById(`cmobile-${id}`).value; 
+window.order = async function(id, item, price){
+const name = document.getElementById(`cname-${id}`).value;
+const mobile = document.getElementById(`cmobile-${id}`).value;
 const addr = document.getElementById(`caddr-${id}`).value;
 if(name === "" || mobile === "" || addr === ""){ alert("নাম, মোবাইল, ঠিকানা সব দিন"); return; }
 const orderId = push(ref(db, 'orders'), {name: name, item: item, price: price, mobile: mobile, address: addr, time: new Date().toLocaleString("bn-BD")}).key;
-document.getElementById('status').innerText = "✅ অর্ডার সফল! সকল এডমিনকে নোটিফাই করা হচ্ছে..."; 
-document.getElementById(`cname-${id}`).value = ""; 
-document.getElementById(`cmobile-${id}`).value = ""; 
-document.getElementById(`caddr-${id}`).value = ""; 
-
+document.getElementById('status').innerText = "✅ অর্ডার সফল! সকল এডমিনকে নোটিফাই করা হচ্ছে...";
+document.getElementById(`cname-${id}`).value = ""; document.getElementById(`cmobile-${id}`).value = ""; document.getElementById(`caddr-${id}`).value = "";
 let message = `নতুন অর্ডার 🔥%0AOrderID: ${orderId}%0AName: ${name}%0AProduct: ${item}%0APrice: ${price}TK%0AMobile: ${mobile}%0AAddress: ${addr}%0ATime: ${new Date().toLocaleString("bn-BD")}`;
 window.open(`https://wa.me/${ORDER_WHATSAPP}?text=${message}`, '_blank');
 const adminsSnap = await get(ref(db, 'admins'));
@@ -88,24 +98,51 @@ loadMyTickets(mobile);
 // Support Ticket
 window.openSupport = function(){ document.getElementById('supportPopup').style.display = 'flex'; }
 window.closeSupport = function(){ document.getElementById('supportPopup').style.display = 'none'; }
+
 window.submitTicket = async function(){
-const name=document.getElementById('sname').value; const mobile=document.getElementById('smobile').value; const product=document.getElementById('sproduct').value; const problem=document.getElementById('sproblem').value;
-if(name==""||mobile==""||product=="প্রোডাক্ট সিলেক্ট করুন"||problem==""){alert("সব ফিল্ড পূরণ করুন");return;}
-const ticketId = push(ref(db,'tickets'),{name,mobile,product,problem,status:"Pending",reply:"",repliedBy:"",time:new Date().toLocaleString("bn-BD")}).key;
-let message = `নতুন সাপোর্ট টিকেট 🔔%0ATicketID: ${ticketId}%0AName: ${name}%0AMobile: ${mobile}%0AProduct: ${product}%0AProblem: ${problem}`;
+const name=document.getElementById('sname').value;
+const mobile=document.getElementById('smobile').value;
+const product=document.getElementById('sproduct').value;
+const problem=document.getElementById('sproblem').value;
+const trxid=document.getElementById('strxid').value;
+const screenshot=document.getElementById('sscreenshotURL').value;
+
+if(name==""||mobile==""||product=="প্রোডাক্ট সিলেক্ট করুন"||problem==""){alert("নাম, মোবাইল, প্রোডাক্ট, সমস্যা বাধ্যতামূলক");return;}
+
+const ticketId = push(ref(db,'tickets'),{
+name,mobile,product,problem,
+trxid: trxid, 
+screenshot: screenshot,
+status:"Pending",reply:"",repliedBy:"",time:new Date().toLocaleString("bn-BD")
+}).key;
+
+let message = `নতুন সাপোর্ট টিকেট 🔔%0ATicketID: ${ticketId}%0AName: ${name}%0AMobile: ${mobile}%0AProduct: ${product}%0AProblem: ${problem}%0ATrxID: ${trxid}%0AScreenshot: ${screenshot}`;
 window.open(`https://wa.me/${SUPPORT_WHATSAPP}?text=${message}`, '_blank');
+
 const sAdminsSnap = await get(ref(db, 'supportAdmins'));
 if(sAdminsSnap.exists()){ let i=1; sAdminsSnap.forEach(c=>{ let adminMobile = c.val().mobile.replace(/^0/, '88'); setTimeout(()=>{ window.open(`https://wa.me/${adminMobile}?text=${message}`, '_blank'); }, i * 1000); i++; }) }
-alert("টিকেট সাবমিট হয়েছে ✅ Admin রিপ্লাই দিলে এখানে দেখতে পাবেন");
-closeSupport(); document.getElementById('sname').value=""; document.getElementById('smobile').value=""; document.getElementById('sproblem').value="";
+
+alert("টিকেট সাবমিট হয়েছে ✅ Admin রিপ্লাই দিলে এখানে দেখতে পাবেন"); 
+closeSupport();
+document.getElementById('sname').value=""; document.getElementById('smobile').value=""; document.getElementById('sproblem').value="";
+document.getElementById('strxid').value=""; document.getElementById('sscreenshotURL').value="";
 loadMyTickets(mobile);
 }
 
 function loadMyTickets(mobile){
-onValue(ref(db,'tickets'),(s)=>{ let html="<h4>আমার টিকেট:</h4>"; s.forEach(c=>{ if(c.val().mobile==mobile){
-html+=`<div class="reply-box"><b>টিকেট:</b> ${c.val().problem}<br><b>Status:</b> ${c.val().status}`;
-if(c.val().reply!="") html+=`<br><b style="color:#00ff88">Admin ${c.val().repliedBy || 'Admin'} এর রিপ্লাই:</b> ${c.val().reply}`; 
-html+="</div>"}}); document.getElementById('myTickets').innerHTML=html; })
+onValue(ref(db,'tickets'),(s)=>{
+let html="<h4>আমার টিকেট:</h4>";
+s.forEach(c=>{
+if(c.val().mobile==mobile){
+let t = c.val();
+html+=`<div class="reply-box"><b>টিকেট:</b> ${t.problem}<br><b>Status:</b> ${t.status}<br>`;
+if(t.trxid) html+=`<b>TrxID:</b> ${t.trxid}<br>`;
+if(t.screenshot) html+=`<b>স্ক্রিনশট:</b> <a href="${t.screenshot}" target="_blank" style="color:#00aaff">ছবি দেখুন</a><br>`;
+if(t.reply!="") html+=`<b style="color:#00ff88">Admin ${t.repliedBy || 'Admin'} এর রিপ্লাই:</b> ${t.reply}`;
+html+="</div>"
+}});
+document.getElementById('myTickets').innerHTML=html;
+})
 }
 </script>
 </body>
