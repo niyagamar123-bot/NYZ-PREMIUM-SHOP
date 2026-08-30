@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<title>ADMIN - AURA SHOP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{font-family:'Arial',sans-serif;background:#000;color:white;text-align:center;padding:20px;margin:0}
+input,button,textarea{padding:12px;margin:8px;border-radius:8px;border:none;width:90%;font-size:16px}
+textarea{height:80px;resize:vertical}
+button{background:#ff6600;color:white;cursor:pointer;font-weight:bold}
+#adminBox{background:#111;padding:20px;border-radius:15px;margin-top:20px;text-align:left;max-width:600px;margin-left:auto;margin-right:auto}
+.del{background:red;width:auto;padding:8px 15px}
+.product-admin,.order{background:#222;padding:15px;margin:10px 0;border-radius:10px}
+h1{color:#ff6600}
+</style>
+</head>
+<body> 
+<h1>🔒 ADMIN PANEL</h1>
+<div id="loginBox">
+<input id="pass" type="password" placeholder="Admin Password">
+<button onclick="login()">Login</button>
+</div>
+<div id="adminBox" style="display:none;">
+<h3>➕ নতুন প্রোডাক্ট অ্যাড করুন</h3>
+<input id="pname" placeholder="Product Name: যেমন Premium T-Shirt">
+<input id="pprice" type="number" placeholder="Price TK: যেমন 800">
+<input id="pimg" placeholder="Image URL: imgur.com থেকে লিংক">
+<textarea id="pdesc" placeholder="Product Description: এটা দিয়ে কি কাজ হয়, ফিচার লিখো"></textarea>
+<button onclick="addProduct()">Add Product</button>
+<hr><h3>📦 প্রোডাক্ট লিস্ট</h3><div id="plist"></div>
+<hr><h3>📋 অর্ডার লিস্ট</h3><div id="olist"></div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+const firebaseConfig = {apiKey: "AIzaSyAeL4HVPaea7ZCfI3jg1HFcJlv1nxnOm8g", authDomain: "aura-premium-shop.firebaseapp.com", databaseURL: "https://aura-premium-shop-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "aura-premium-shop", storageBucket: "aura-premium-shop.firebasestorage.app", messagingSenderId: "716630218001", appId: "1:716630218001:web:74abbe23e91048877568b0"};
+const app = initializeApp(firebaseConfig); const db = getDatabase(app); const ADMIN_PASS = "Niyaz@@@@"; 
+
+window.login = function(){ if(document.getElementById('pass').value === ADMIN_PASS){ document.getElementById('loginBox').style.display = "none"; document.getElementById('adminBox').style.display = "block"; loadAdminData(); } else { alert("ভুল পাসওয়ার্ড ❌"); } }
+
+function loadAdminData(){ onValue(ref(db, 'products'), (s)=>{ let html=""; s.forEach(c=>{ html+=`<div class="product-admin"><b>${c.val().name}</b> - ${c.val().price}TK <br><small style="color:#aaa">${c.val().desc || ''}</small> <button class="del" onclick="delProd('${c.key}')">Delete</button></div>` }); document.getElementById('plist').innerHTML=html; });
+onValue(ref(db, 'orders'), (s)=>{ let html=""; s.forEach(c=>{ html+=`<div class="order"><b>Product:</b> ${c.val().item} - ${c.val().price}TK <br> <b>Name:</b> ${c.val().name} <br> <b>Address:</b> ${c.val().address} <br> <b>Time:</b> ${c.val().time}</div>` }); document.getElementById('olist').innerHTML=html; }); }
+
+window.addProduct = function(){ 
+const n=document.getElementById('pname').value; 
+const p=document.getElementById('pprice').value; 
+const i=document.getElementById('pimg').value;
+const d=document.getElementById('pdesc').value;
+if(n==""||p==""){alert("নাম আর দাম দাও");return;} 
+push(ref(db,'products'),{name:n, price:p, img:i, desc:d}); 
+document.getElementById('pname').value=""; document.getElementById('pprice').value=""; document.getElementById('pimg').value=""; document.getElementById('pdesc').value="";
+alert("অ্যাড হয়ে গেছে ✅"); }
+
+window.delProd = function(id){if(confirm("ডিলিট করবা?")) remove(ref(db,'products/'+id));}
+</script>
+</body>
+</html>
