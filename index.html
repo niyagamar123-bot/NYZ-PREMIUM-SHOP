@@ -2,135 +2,168 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
+<title>AURA SHOP</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AURA PREMIUM SHOP</title>
 <style>
-body{font-family:sans-serif;background:#0f0f0f;color:white;margin:0;padding:20px}
-h1{color:#ff8800;text-align:center}
-.admin{display:none;background:#1a1a1a;padding:20px;border-radius:10px;margin-bottom:20px;border:1px solid #ff8800}
-input,textarea{width:95%;padding:10px;margin:5px;border-radius:5px;border:none;background:#222;color:white}
-button{background:#ff8800;color:black;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:bold;margin:5px}
-.product-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));gap:15px}
-.product{background:#1a1a1a;padding:15px;border-radius:10px;border:1px solid #333;text-align:center}
-.product img{width:100%;height:180px;object-fit:cover;border-radius:8px}
-.footer{background:#111;padding:20px;margin-top:30px;border-radius:10px;text-align:center}
-a{color:#ff8800;text-decoration:none}
+body{font-family:'Arial',sans-serif;background:#0f0f0f;color:white;text-align:center;padding:20px;margin:0}
+.product{background:#1a1a1a;padding:20px;margin:15px;border-radius:15px;display:inline-block;width:300px;box-shadow:0 0 10px #ff660044;vertical-align:top}
+input,button{padding:12px;margin:8px;border-radius:8px;border:none;width:90%;font-size:16px}
+button{background:#ff6600;color:white;cursor:pointer;font-weight:bold}
+button:hover{background:#ff8800}
+h1{color:#ff6600;font-size:32px}
+.footer{background:#1a1a1a;padding:20px;margin-top:40px;border-radius:15px;text-align:left;max-width:500px;margin-left:auto;margin-right:auto}
+.number{font-size:22px;color:#00ff88;font-weight:bold}
+.pay-box{background:#222;padding:12px;border-radius:10px;margin:10px 0}
+#adminPanel{background:#000;padding:20px;margin-top:20px;border:2px solid #ff6600;border-radius:15px;display:none}
+.del{background:red;width:auto;padding:8px 15px}
+.product-admin,.order{background:#1a1a1a;padding:15px;margin:10px 0;border-radius:10px;text-align:left}
+img{border-radius:10px}
 </style>
 </head>
-<body>
-  <script>
-  let pass = prompt("Admin Password দিন:");
-  if(pass != "Niyaz@@@@"){
-    alert("ভুল Password!");
-    window.location.href = "index.html";
-  }else{
-    document.getElementById("adminPanel").style.display = "block";
-  }
-  </script>
-<img src="received_2015456459412794.jpeg" width="60" style="display:block;margin:0 auto">
-<h1>AURA PREMIUM SHOP</h1>
+<body> 
+<img src="https://i.postimg.cc/T3QGPRz9/inbound407270357519731011.webp" width="80" style="display:block;margin:10px auto;">
+<h1>🔥 AURA SHOP 🔥</h1>
+<p>আপনার পছন্দের সব প্রোডাক্ট - 24/7 Service</p>
 
-<!-- ADMIN PANEL -->
-<div id="adminPanel" class="admin">
-  <h2 style="color:#ff8800">Admin থেকে প্রোডাক্ট অ্যাড করুন</h2>
-  <input type="text" id="pName" placeholder="প্রোডাক্ট নাম">
-  <input type="text" id="pPrice" placeholder="দাম যেমন: 22000 টাকা">
-  <input type="text" id="pImg" placeholder="প্রোডাক্ট ছবির URL লিংক">
-  <textarea id="pDesc" placeholder="প্রোডাক্ট ডিসক্রিপশন"></textarea>
-  <button onclick="addProduct()">Product Add করুন</button>
-  <button onclick="clearProducts()" style="background:red">সব ডিলিট</button>
-</div>
+<div id="products"><p>Loading products...</p></div>
+<p id="status" style="color:lime;font-size:18px;"></p>
 
-<h2 style="text-align:center">আমাদের প্রোডাক্ট সমূহ</h2>
-<div id="productList" class="product-grid"></div>
-
-<!-- ORDER FORM -->
-<div id="orderForm" style="display:none;background:#1a1a1a;padding:20px;border-radius:10px;margin-top:20px">
-  <h2 id="orderTitle" style="color:#ff8800"></h2>
-  <input type="text" id="cName" placeholder="আপনার নাম">
-  <input type="tel" id="cPhone" placeholder="ফোন নাম্বার">
-  <input type="email" id="cEmail" placeholder="ইমেইল এড্রেস">
-  <textarea id="cAddress" placeholder="সম্পূর্ণ ঠিকানা"></textarea>
-  <button onclick="submitOrder()">WhatsApp এ অর্ডার করুন</button>
-</div>
-
-<!-- CONTACT FOOTER -->
 <div class="footer">
-  <h3>পেমেন্ট ও যোগাযোগ</h3>
-  <p><b>বিকাশ/নগদ:</b> 01908807313</p>
-  <p><b>WhatsApp:</b> <a href="https://wa.me/8801908807313">01908807313</a></p>
-  <p><b>Telegram:</b> <a href="https://t.me/niyaz_official">@niyaz_official</a></p>
-  <p style="font-size:12px;color:gray">অর্ডার কনফার্ম করতে আগে 50% পেমেন্ট করুন</p>
+<h3>📞 যোগাযোগ ও পেমেন্ট</h3>
+<div class="pay-box"><b>বিকাশ:</b> <span class="number">01908807313</span></div>
+<div class="pay-box"><b>নগদ:</b> <span class="number">01908807313</span></div>
+<p><b>WhatsApp:</b> <a href="https://wa.me/8801908807313" style="color:#00ff88">01908807313</a></p>
+<p><b>Telegram:</b> <a href="https://t.me/niyaz_official" style="color:#00ff88">@niyaz_official</a></p>
+<hr style="border-color:#333;">
+<p style="font-size:14px;color:#aaa;"><b>অর্ডার করার নিয়ম:</b><br>
+1. প্রোডাক্ট সিলেক্ট করে নাম + ঠিকানা দিন<br>
+2. Order Now চাপুন<br>
+3. বিকাশ/নগদে পেমেন্ট করুন<br>
+4. অর্ডার কনফার্মেশন WhatsApp এ পাঠান</p>
 </div>
 
-<script>
-let products = JSON.parse(localStorage.getItem('aura_products')) || [];
-let selectedProduct = "";
+<!-- HIDDEN ADMIN PANEL -->
+<div id="adminPanel">
+<h2>🔒 ADMIN PANEL</h2>
+<div id="loginBox">
+<input id="pass" type="password" placeholder="Admin Password">
+<button onclick="login()">Login</button>
+</div>
+<div id="adminBox" style="display:none;">
+<h3>➕ নতুন প্রোডাক্ট অ্যাড করুন</h3>
+<input id="pname" placeholder="Product Name: যেমন T-Shirt">
+<input id="pprice" type="number" placeholder="Price TK: যেমন 500">
+<input id="pimg" placeholder="Image URL: optional">
+<button onclick="addProduct()">Add Product</button>
+<hr>
+<h3>📦 প্রোডাক্ট লিস্ট</h3><div id="plist"></div>
+<hr>
+<h3>📋 অর্ডার লিস্ট</h3><div id="olist"></div>
+</div>
+</div>
 
-// Admin Check
-const urlParams = new URLSearchParams(window.location.search);
-if(urlParams.has('niyazboss')){
-  document.getElementById('adminPanel').style.display = 'block';
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyAeL4HVPaea7ZCfI3jg1HFcJlv1nxnOm8g",
+authDomain: "aura-premium-shop.firebaseapp.com",
+databaseURL: "https://aura-premium-shop-default-rtdb.asia-southeast1.firebasedatabase.app",
+projectId: "aura-premium-shop",
+storageBucket: "aura-premium-shop.firebasestorage.app",
+messagingSenderId: "716630218001",
+appId: "1:716630218001:web:74abbe23e91048877568b0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const ADMIN_PASS = "Niyaz@@@@"; 
+
+// Password Popup
+setTimeout(()=>{
+let pass = prompt("Admin হতে চাইলে Password দিন। কাস্টমার হলে Cancel চাপুন");
+if(pass == ADMIN_PASS){
+document.getElementById('adminPanel').style.display = 'block';
+}
+},500)
+
+// সব প্রোডাক্ট লোড
+onValue(ref(db, 'products'), (snapshot) => {
+const productsDiv = document.getElementById('products');
+productsDiv.innerHTML = "";
+if(snapshot.exists()){
+snapshot.forEach((child) => {
+const p = child.val();
+let imgTag = p.img ? `<img src="${p.img}" width="100%">` : '';
+productsDiv.innerHTML += `
+<div class="product">
+${imgTag}
+<h2>${p.name}</h2>
+<p style="font-size:20px;color:#ff6600">দাম: ${p.price} TK</p>
+<input id="cname-${child.key}" placeholder="আপনার নাম">
+<input id="caddr-${child.key}" placeholder="ঠিকানা + মোবাইল">
+<button onclick="order('${child.key}','${p.name}', ${p.price})">Order Now</button>
+</div>`;
+});
+} else {
+productsDiv.innerHTML = "<p style='color:red'>Admin থেকে প্রোডাক্ট অ্যাড করুন</p>";
+}
+});
+
+// অর্ডার ফাংশন
+window.order = function(id, item, price){
+const name = document.getElementById(`cname-${id}`).value;
+const addr = document.getElementById(`caddr-${id}`).value;
+if(name === "" || addr === ""){ alert("নাম এবং ঠিকানা দিন"); return; }
+push(ref(db, 'orders'), {item: item, price: price, name: name, address: addr, time: new Date().toLocaleString("bn-BD")});
+document.getElementById('status').innerText = "✅ অর্ডার সফল! আমরা WhatsApp এ যোগাযোগ করবো";
+document.getElementById(`cname-${id}`).value = "";
+document.getElementById(`caddr-${id}`).value = "";
 }
 
-function addProduct(){
-  let name = document.getElementById('pName').value;
-  let price = document.getElementById('pPrice').value;
-  let img = document.getElementById('pImg').value;
-  let desc = document.getElementById('pDesc').value;
-  if(name=="" || price=="" || img==""){ alert("নাম, দাম, ছবির URL দিন"); return; }
-  products.push({name, price, img, desc});
-  localStorage.setItem('aura_products', JSON.stringify(products));
-  alert("Product Added!");
-  loadProducts();
-  document.getElementById('pName').value="";
-  document.getElementById('pPrice').value="";
-  document.getElementById('pImg').value="";
-  document.getElementById('pDesc').value="";
+// Admin Login
+window.login = function(){
+if(document.getElementById('pass').value === ADMIN_PASS){
+document.getElementById('loginBox').style.display = "none";
+document.getElementById('adminBox').style.display = "block";
+loadAdminData();
+} else { alert("ভুল পাসওয়ার্ড ❌"); }
 }
 
-function loadProducts(){
-  let html = "";
-  products.forEach((p, i)=>{
-    html += `<div class="product">
-      <img src="${p.img}">
-      <h3>${p.name}</h3>
-      <p style="color:#ff8800;font-weight:bold">${p.price}</p>
-      <p style="font-size:14px">${p.desc}</p>
-      <button onclick="orderNow('${p.name}')">অর্ডার করুন</button>
-    </div>`;
-  });
-  document.getElementById('productList').innerHTML = html;
+// Admin Data Load
+function loadAdminData(){
+onValue(ref(db, 'products'), (s)=>{
+let html="";
+s.forEach(c=>{
+html+=`<div class="product-admin"><b>${c.val().name}</b> - ${c.val().price}TK <button class="del" onclick="delProd('${c.key}')">Delete</button></div>`
+});
+document.getElementById('plist').innerHTML=html;
+});
+onValue(ref(db, 'orders'), (s)=>{
+let html="";
+s.forEach(c=>{
+html+=`<div class="order"><b>Product:</b> ${c.val().item} - ${c.val().price}TK <br> <b>Name:</b> ${c.val().name} <br> <b>Address:</b> ${c.val().address} <br> <b>Time:</b> ${c.val().time}</div>`
+});
+document.getElementById('olist').innerHTML=html;
+});
 }
 
-function orderNow(name){
-  selectedProduct = name;
-  document.getElementById('orderTitle').innerText = name + " অর্ডার করুন";
-  document.getElementById('orderForm').style.display = 'block';
-  window.scrollTo(0,document.body.scrollHeight);
+// প্রোডাক্ট অ্যাড
+window.addProduct = function(){
+const n=document.getElementById('pname').value; 
+const p=document.getElementById('pprice').value;
+const i=document.getElementById('pimg').value;
+if(n==""||p==""){alert("নাম আর দাম দাও");return;} 
+push(ref(db,'products'),{name:n, price:p, img:i}); 
+document.getElementById('pname').value="";
+document.getElementById('pprice').value="";
+document.getElementById('pimg').value="";
+alert("অ্যাড হয়ে গেছে ✅");
 }
 
-function submitOrder(){
-  let name = document.getElementById('cName').value;
-  let phone = document.getElementById('cPhone').value;
-  let email = document.getElementById('cEmail').value;
-  let address = document.getElementById('cAddress').value;
-  if(name=="" || phone=="" || address==""){ alert("নাম, ফোন, ঠিকানা দিন"); return; }
-  
-  let msg = `নতুন অর্ডার:%0Aপ্রোডাক্ট: ${selectedProduct}%0Aনাম: ${name}%0Aফোন: ${phone}%0Aইমেইল: ${email}%0Aঠিকানা: ${address}`;
-  window.open(`https://wa.me/8801908807313?text=${msg}`);
-}
-
-function clearProducts(){
-  if(confirm("সব প্রোডাক্ট ডিলিট করবেন?")){
-    products = [];
-    localStorage.setItem('aura_products', JSON.stringify(products));
-    loadProducts();
-  }
-}
-
-loadProducts();
+// প্রোডাক্ট ডিলিট
+window.delProd = function(id){if(confirm("ডিলিট করবা?")) remove(ref(db,'products/'+id));}
 </script>
-
 </body>
 </html>
