@@ -7,34 +7,36 @@
 <style>
 body{font-family:'Arial',sans-serif;background:#000;color:white;text-align:center;padding:20px;margin:0}
 input,button,textarea{padding:12px;margin:8px;border-radius:8px;border:none;width:90%;font-size:16px}
-textarea{height:80px;resize:vertical}
 button{background:#ff6600;color:white;cursor:pointer;font-weight:bold}
-button:hover{background:#ff8800}
-#adminBox{background:#111;padding:20px;border-radius:15px;margin-top:20px;text-align:left;max-width:600px;margin-left:auto;margin-right:auto}
+#adminBox{background:#111;padding:20px;border-radius:15px;margin-top:20px;text-align:left;max-width:700px;margin-left:auto;margin-right:auto}
 .del{background:red;width:auto;padding:8px 15px;float:right}
-.product-admin,.order{background:#222;padding:15px;margin:10px 0;border-radius:10px;overflow:hidden}
-h1{color:#ff6600}
-hr{border-color:#333}
+.product-admin,.order,.admin-list{background:#222;padding:15px;margin:10px 0;border-radius:10px}
+h1{color:#ff6600} hr{border-color:#333}
 </style>
 </head>
 <body> 
-<h1>🔒 ADMIN PANEL</h1>
+<h1>🔒 MAIN ADMIN PANEL</h1>
 
 <div id="loginBox">
-<input id="pass" type="password" placeholder="Admin Password">
+<input id="pass" type="password" placeholder="Main Admin Password">
 <button onclick="login()">Login</button>
 </div>
 
 <div id="adminBox" style="display:none;">
-<h3>➕ নতুন প্রোডাক্ট অ্যাড করুন</h3>
-<input id="pname" placeholder="Product Name: যেমন FFMAX PANEL">
-<input id="pprice" type="number" placeholder="Price TK: যেমন 2500">
-<input id="pimg" placeholder="Image URL: https://i.imgur.com/xxxx.webp">
-<textarea id="pdesc" placeholder="Product Description: ফিচার লিখো"></textarea>
+<h3>👑 Sub Admin ম্যানেজ করুন - Max 5 জন</h3>
+<input id="aname" placeholder="Admin Name">
+<input id="amobile" placeholder="Admin WhatsApp 01XXXXXXXXX">
+<button onclick="addAdmin()">+ Admin Add করুন</button>
+<div id="adminList"></div>
+
+<hr><h3>➕ নতুন প্রোডাক্ট অ্যাড করুন</h3>
+<input id="pname" placeholder="Product Name">
+<input id="pprice" type="number" placeholder="Price TK">
+<input id="pimg" placeholder="Image URL">
+<textarea id="pdesc" placeholder="Product Description"></textarea>
 <button onclick="addProduct()">+ প্রোডাক্ট অ্যাড করুন</button>
 
 <hr><h3>📦 প্রোডাক্ট লিস্ট</h3><div id="plist"></div>
-
 <hr><h3>📋 অর্ডার লিস্ট</h3><div id="olist"></div>
 </div>
 
@@ -43,8 +45,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {apiKey: "AIzaSyAeL4HVPaea7ZCfI3jg1HFcJlv1nxnOm8g", authDomain: "aura-premium-shop.firebaseapp.com", databaseURL: "https://aura-premium-shop-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "aura-premium-shop", storageBucket: "aura-premium-shop.firebasestorage.app", messagingSenderId: "716630218001", appId: "1:716630218001:web:74abbe23e91048877568b0"};
-const app = initializeApp(firebaseConfig); 
-const db = getDatabase(app); 
+const app = initializeApp(firebaseConfig); const db = getDatabase(app); 
 const ADMIN_PASS = "Niyaz@@@@"; 
 
 window.login = function(){ 
@@ -52,38 +53,50 @@ window.login = function(){
     document.getElementById('loginBox').style.display = "none"; 
     document.getElementById('adminBox').style.display = "block"; 
     loadAdminData(); 
-  } else { 
-    alert("ভুল পাসওয়ার্ড ❌"); 
-  } 
+  } else { alert("ভুল পাসওয়ার্ড ❌"); } 
 }
 
 function loadAdminData(){
-  // প্রোডাক্ট লোড
+  onValue(ref(db, 'admins'), (s)=>{
+    let count = s.size;
+    let html=`<h4>Active Admins: ${count}/5</h4>`;
+    s.forEach(c=>{
+      html+=`<div class="admin-list"><button class="del" onclick="delAdmin('${c.key}')">Delete</button><b>${c.val().name}</b> - ${c.val().mobile}</div>` 
+    }); 
+    document.getElementById('adminList').innerHTML=html; 
+  });
+
   onValue(ref(db, 'products'), (s)=>{
     let html="";
     s.forEach(c=>{
-      html+=`<div class="product-admin">
-      <button class="del" onclick="delProd('${c.key}')">Delete</button>
-      <b>${c.val().name}</b> - <span style="color:#ff6600">${c.val().price}TK</span> 
-      <br><small style="color:#aaa">${c.val().desc || ''}</small>
-      </div>` 
+      html+=`<div class="product-admin"><button class="del" onclick="delProd('${c.key}')">Delete</button><b>${c.val().name}</b> - <span style="color:#ff6600">${c.val().price}TK</span> <br><small>${c.val().desc || ''}</small></div>` 
     }); 
     document.getElementById('plist').innerHTML=html; 
   });
 
-  // অর্ডার লোড - এখন শুধু মোবাইল
   onValue(ref(db, 'orders'), (s)=>{
     let html="";
     s.forEach(c=>{
-      html+=`<div class="order">
-      <b>Product:</b> ${c.val().item} - ${c.val().price}TK <br> 
-      <b>Mobile:</b> <span style="color:#00ff88;font-size:18px">${c.val().mobile}</span> <br> 
-      <b>Time:</b> ${c.val().time}
-      </div>` 
+      html+=`<div class="order"><b>Name:</b> ${c.val().name} <br><b>Product:</b> ${c.val().item} - ${c.val().price}TK <br><b>Mobile:</b> <span style="color:#00ff88">${c.val().mobile}</span> <br><b>Address:</b> ${c.val().address} <br><b>Time:</b> ${c.val().time}</div>` 
     }); 
     document.getElementById('olist').innerHTML=html; 
   }); 
 }
+
+window.addAdmin = function(){
+  const n=document.getElementById('aname').value; 
+  const m=document.getElementById('amobile').value;
+  if(n==""||m==""){alert("নাম আর নাম্বার দাও");return;} 
+  onValue(ref(db,'admins'), (s)=>{
+    if(s.size >= 5){ alert("সর্বোচ্চ 5 জন Admin রাখা যাবে"); return; }
+    push(ref(db,'admins'),{name:n, mobile:m}); 
+    document.getElementById('aname').value=""; 
+    document.getElementById('amobile').value="";
+    alert("Admin Add হলো ✅");
+  }, {onlyOnce: true});
+}
+
+window.delAdmin = function(id){ if(confirm("ডিলিট করবা?")) remove(ref(db,'admins/'+id)); }
 
 window.addProduct = function(){ 
   const n=document.getElementById('pname').value; 
@@ -99,9 +112,7 @@ window.addProduct = function(){
   alert("অ্যাড হয়ে গেছে ✅"); 
 }
 
-window.delProd = function(id){
-  if(confirm("ডিলিট করবা?")) remove(ref(db,'products/'+id));
-}
+window.delProd = function(id){ if(confirm("ডিলিট করবা?")) remove(ref(db,'products/'+id)); }
 </script>
 </body>
 </html>
