@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<title>Staff Panel - Aura Shop</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{background:#111;color:white;font-family:'Hind Siliguri';padding:20px}
+.ticket{background:#1a1a1a;padding:15px;margin:15px 0;border-radius:12px;border-left:4px solid #ff6600}
+input,button{padding:12px;margin:8px 0;border-radius:8px;border:none;width:100%;font-size:15px}
+button{background:#ff6600;color:white;font-weight:700;cursor:pointer}
+</style>
+</head>
+<body>
+<h2 style="color:#ff6600;text-align:center">👨‍💼 Staff Support Panel</h2>
+<div id="tickets">Loading...</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+const firebaseConfig = {apiKey: "AIzaSyAeL4HVPaea7ZCfI3jg1HFcJlv1nxnOm8g", authDomain: "aura-premium-shop.firebaseapp.com", databaseURL: "https://aura-premium-shop-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "aura-premium-shop", storageBucket: "aura-premium-shop.firebasestorage.app", messagingSenderId: "716630218001", appId: "1:716630218001:web:74abbe23e91048877568b0"};
+const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+
+const STAFF_NAME = prompt("আপনার নাম লিখুন:"); // Staff এর নাম
+
+onValue(ref(db, 'tickets'), (snapshot) => {
+let html = "";
+snapshot.forEach((child) => {
+const t = child.val();
+html += `<div class="ticket">
+<b>TicketID:</b> ${child.key}<br>
+<b>Name:</b> ${t.name}<br>
+<b>Mobile:</b> ${t.mobile}<br>
+<b>Problem:</b> ${t.problem}<br>
+<b>Status:</b> ${t.status}<br>
+<input id="reply-${child.key}" placeholder="রিপ্লাই লিখুন">
+<button onclick="sendReply('${child.key}')">রিপ্লাই পাঠান</button>
+</div>`;
+});
+document.getElementById('tickets').innerHTML = html;
+});
+
+window.sendReply = function(ticketId){
+const replyText = document.getElementById(`reply-${ticketId}`).value;
+if(replyText === ""){alert("রিপ্লাই লিখুন");return;}
+update(ref(db, 'tickets/' + ticketId), {
+reply: replyText,
+repliedBy: "Staff - " + STAFF_NAME,
+status: "Replied"
+});
+alert("রিপ্লাই পাঠানো হয়েছে ✅");
+}
+</script>
+</body>
+</html>
