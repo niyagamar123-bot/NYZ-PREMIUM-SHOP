@@ -31,9 +31,6 @@ img{border-radius:10px;width:100%;margin-bottom:10px}
 <div class="pay-box"><b>বিকাশ:</b> <span class="number">01908807313</span></div>
 <div class="pay-box"><b>নগদ:</b> <span class="number">01908807313</span></div>
 <p><b>WhatsApp:</b> <span class="number">01908807313</span></p>
-<p><b>Telegram:</b> <span class="number">@niyaz_official</span></p>
-<hr style="border-color:#333;">
-<p style="font-size:14px;color:#aaa;"><b>অর্ডার করার নিয়ম:</b><br>1. শুধু মোবাইল নাম্বার দিন<br>2. Order Now চাপুন<br>3. আমরা কল/WhatsApp এ যোগাযোগ করবো</p>
 </div>
 
 <script type="module">
@@ -41,6 +38,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 const firebaseConfig = {apiKey: "AIzaSyAeL4HVPaea7ZCfI3jg1HFcJlv1nxnOm8g", authDomain: "aura-premium-shop.firebaseapp.com", databaseURL: "https://aura-premium-shop-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "aura-premium-shop", storageBucket: "aura-premium-shop.firebasestorage.app", messagingSenderId: "716630218001", appId: "1:716630218001:web:74abbe23e91048877568b0"};
 const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+
+// তোমার WhatsApp নাম্বার এখানে বসাও। 88 দিয়ে শুরু
+const WHATSAPP_NUMBER = "8801908807313"; 
 
 onValue(ref(db, 'products'), (snapshot) => {
 const productsDiv = document.getElementById('products'); productsDiv.innerHTML = "";
@@ -51,8 +51,20 @@ else { productsDiv.innerHTML = "<p style='color:red;text-align:center'>শীঘ
 window.order = function(id, item, price){ 
 const mobile = document.getElementById(`cmobile-${id}`).value; 
 if(mobile === "" || mobile.length < 11){ alert("সঠিক মোবাইল নাম্বার দিন"); return; }
+
+// 1. Firebase এ Save হবে
 push(ref(db, 'orders'), {item: item, price: price, mobile: mobile, time: new Date().toLocaleString("bn-BD")});
-document.getElementById('status').innerText = "✅ অর্ডার সফল! আমরা শীঘ্রই কল করবো"; document.getElementById(`cmobile-${id}`).value = ""; }
+
+// 2. Success মেসেজ দেখাবে
+document.getElementById('status').innerText = "✅ অর্ডার সফল! WhatsApp এ রিডাইরেক্ট হচ্ছে..."; 
+document.getElementById(`cmobile-${id}`).value = ""; 
+
+// 3. Direct WhatsApp এ নিয়ে যাবে
+let message = `নতুন অর্ডার 🔥%0A%0AProduct: ${item}%0APrice: ${price}TK%0AMobile: ${mobile}`;
+let whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+setTimeout(() => { window.open(whatsappURL, '_blank'); }, 1500);
+
+}
 </script>
 </body>
 </html>
