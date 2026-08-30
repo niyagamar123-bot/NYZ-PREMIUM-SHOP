@@ -8,45 +8,49 @@
 body{font-family:'Arial',sans-serif;background:#000;color:white;text-align:center;padding:20px;margin:0}
 input,button,textarea{padding:12px;margin:8px;border-radius:8px;border:none;width:90%;font-size:16px}
 button{background:#ff6600;color:white;cursor:pointer;font-weight:bold}
-#adminBox{background:#111;padding:20px;border-radius:15px;margin-top:20px;text-align:left;max-width:700px;margin-left:auto;margin-right:auto}
+#adminBox{background:#111;padding:20px;border-radius:15px;margin-top:20px;text-align:left;max-width:800px;margin-left:auto;margin-right:auto}
 .del{background:red;width:auto;padding:8px 15px;float:right}
-.product-admin,.order,.admin-list{background:#222;padding:15px;margin:10px 0;border-radius:10px}
+.product-admin,.order,.admin-list,.ticket{background:#222;padding:15px;margin:10px 0;border-radius:10px}
 h1{color:#ff6600} hr{border-color:#333}
+.success{color:#00ff88;font-weight:bold;text-align:center}
 </style>
 </head>
 <body> 
 <h1>🔒 MAIN ADMIN PANEL</h1>
-
-<div id="loginBox">
-<input id="pass" type="password" placeholder="Main Admin Password">
-<button onclick="login()">Login</button>
-</div>
+<div id="loginBox"><input id="pass" type="password" placeholder="Main Admin Password"><button onclick="login()">Login</button></div>
 
 <div id="adminBox" style="display:none;">
-<h3>👑 Sub Admin ম্যানেজ করুন - Max 5 জন</h3>
+<p id="msg" class="success"></p>
+
+<h3>👑 Order Admin - Max 5 জন</h3>
 <input id="aname" placeholder="Admin Name">
-<input id="amobile" placeholder="Admin WhatsApp 01XXXXXXXXX">
-<button onclick="addAdmin()">+ Admin Add করুন</button>
-<div id="adminList"></div>
+<input id="amobile" placeholder="Admin WhatsApp 01XXXXXXXXX" type="tel">
+<button onclick="addAdmin('admins')">+ Order Admin Add</button><div id="adminList"></div>
+
+<hr><h3>🎧 Support Admin - Max 5 জন</h3>
+<input id="sname" placeholder="Support Admin Name">
+<input id="smobile" placeholder="Support Admin WhatsApp 01XXXXXXXXX" type="tel">
+<button onclick="addAdmin('supportAdmins')">+ Support Admin Add</button><div id="supportAdminList"></div>
 
 <hr><h3>➕ নতুন প্রোডাক্ট অ্যাড করুন</h3>
-<input id="pname" placeholder="Product Name">
-<input id="pprice" type="number" placeholder="Price TK">
-<input id="pimg" placeholder="Image URL">
-<textarea id="pdesc" placeholder="Product Description"></textarea>
+<input id="pname" placeholder="Product Name"><input id="pprice" type="number" placeholder="Price TK">
+<input id="pimg" placeholder="Image URL"><textarea id="pdesc" placeholder="Product Description"></textarea>
 <button onclick="addProduct()">+ প্রোডাক্ট অ্যাড করুন</button>
 
 <hr><h3>📦 প্রোডাক্ট লিস্ট</h3><div id="plist"></div>
 <hr><h3>📋 অর্ডার লিস্ট</h3><div id="olist"></div>
+<hr><h3>🎫 সাপোর্ট টিকেট</h3><div id="tlist"></div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
+import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 const firebaseConfig = {apiKey: "AIzaSyAeL4HVPaea7ZCfI3jg1HFcJlv1nxnOm8g", authDomain: "aura-premium-shop.firebaseapp.com", databaseURL: "https://aura-premium-shop-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "aura-premium-shop", storageBucket: "aura-premium-shop.firebasestorage.app", messagingSenderId: "716630218001", appId: "1:716630218001:web:74abbe23e91048877568b0"};
 const app = initializeApp(firebaseConfig); const db = getDatabase(app); 
 const ADMIN_PASS = "Niyaz@@@@"; 
+let currentAdminName = "Main Admin";
+
+function showMsg(text){ document.getElementById('msg').innerText = text; setTimeout(()=>{document.getElementById('msg').innerText=""},3000); }
 
 window.login = function(){ 
   if(document.getElementById('pass').value === ADMIN_PASS){ 
@@ -57,62 +61,55 @@ window.login = function(){
 }
 
 function loadAdminData(){
-  onValue(ref(db, 'admins'), (s)=>{
-    let count = s.size;
-    let html=`<h4>Active Admins: ${count}/5</h4>`;
-    s.forEach(c=>{
-      html+=`<div class="admin-list"><button class="del" onclick="delAdmin('${c.key}')">Delete</button><b>${c.val().name}</b> - ${c.val().mobile}</div>` 
-    }); 
-    document.getElementById('adminList').innerHTML=html; 
-  });
+  onValue(ref(db, 'admins'), (s)=>{ let count = s.size; let html=`<h4>Active Order Admin: ${count}/5</h4>`;
+    s.forEach(c=>{ html+=`<div class="admin-list"><button class="del" onclick="delAdmin('${c.key}','admins')">Delete</button><b>${c.val().name}</b> - ${c.val().mobile}</div>` }); 
+    document.getElementById('adminList').innerHTML=html; });
 
-  onValue(ref(db, 'products'), (s)=>{
-    let html="";
-    s.forEach(c=>{
-      html+=`<div class="product-admin"><button class="del" onclick="delProd('${c.key}')">Delete</button><b>${c.val().name}</b> - <span style="color:#ff6600">${c.val().price}TK</span> <br><small>${c.val().desc || ''}</small></div>` 
-    }); 
-    document.getElementById('plist').innerHTML=html; 
-  });
+  onValue(ref(db, 'supportAdmins'), (s)=>{ let count = s.size; let html=`<h4>Active Support Admin: ${count}/5</h4>`;
+    s.forEach(c=>{ html+=`<div class="admin-list"><button class="del" onclick="delAdmin('${c.key}','supportAdmins')">Delete</button><b>${c.val().name}</b> - ${c.val().mobile}</div>` }); 
+    document.getElementById('supportAdminList').innerHTML=html; });
 
-  onValue(ref(db, 'orders'), (s)=>{
-    let html="";
-    s.forEach(c=>{
-      html+=`<div class="order"><b>Name:</b> ${c.val().name} <br><b>Product:</b> ${c.val().item} - ${c.val().price}TK <br><b>Mobile:</b> <span style="color:#00ff88">${c.val().mobile}</span> <br><b>Address:</b> ${c.val().address} <br><b>Time:</b> ${c.val().time}</div>` 
-    }); 
-    document.getElementById('olist').innerHTML=html; 
-  }); 
+  onValue(ref(db, 'products'), (s)=>{ let html=""; s.forEach(c=>{ html+=`<div class="product-admin"><button class="del" onclick="delProd('${c.key}')">Delete</button><b>${c.val().name}</b> - <span style="color:#ff6600">${c.val().price}TK</span></div>` }); document.getElementById('plist').innerHTML=html; });
+  onValue(ref(db, 'orders'), (s)=>{ let html=""; s.forEach(c=>{ html+=`<div class="order"><b>ID:</b> ${c.key}<br><b>Name:</b> ${c.val().name} <br><b>Product:</b> ${c.val().item} - ${c.val().price}TK <br><b>Mobile:</b> ${c.val().mobile} <br><b>Address:</b> ${c.val().address}</div>` }); document.getElementById('olist').innerHTML=html; });
+  
+  onValue(ref(db, 'tickets'), (s)=>{ let html=""; s.forEach(c=>{
+    let replyText = c.val().reply ? `<br><b style="color:#00ff88">Reply by ${c.val().repliedBy || 'Admin'}:</b> ${c.val().reply}` : '';
+    html+=`<div class="ticket"><b>TicketID:</b> ${c.key}<br><b>Name:</b> ${c.val().name} <br><b>Mobile:</b> ${c.val().mobile} <br><b>Product:</b> ${c.val().product} <br><b>Problem:</b> ${c.val().problem} <br><b>Status:</b> ${c.val().status}
+    ${replyText}
+    <textarea id="reply-${c.key}" placeholder="রিপ্লাই লিখুন"></textarea>
+    <button onclick="replyTicket('${c.key}')">রিপ্লাই পাঠান</button></div>` }); 
+    document.getElementById('tlist').innerHTML=html; });
 }
 
-window.addAdmin = function(){
-  const n=document.getElementById('aname').value; 
-  const m=document.getElementById('amobile').value;
-  if(n==""||m==""){alert("নাম আর নাম্বার দাও");return;} 
-  onValue(ref(db,'admins'), (s)=>{
-    if(s.size >= 5){ alert("সর্বোচ্চ 5 জন Admin রাখা যাবে"); return; }
-    push(ref(db,'admins'),{name:n, mobile:m}); 
-    document.getElementById('aname').value=""; 
-    document.getElementById('amobile').value="";
-    alert("Admin Add হলো ✅");
+window.addAdmin = function(type){
+  const n=document.getElementById(type=='admins'?'aname':'sname').value; 
+  const m=document.getElementById(type=='admins'?'amobile':'smobile').value;
+  if(n==""||m==""||m.length<11){alert("নাম আর সঠিক 11 ডিজিটের নাম্বার দিন");return;} 
+  onValue(ref(db,type), (s)=>{ 
+    if(s.size >= 5){ alert("সর্বোচ্চ 5 জন"); return; }
+    push(ref(db,type),{name:n, mobile:m});
+    document.getElementById(type=='admins'?'aname':'sname').value=""; 
+    document.getElementById(type=='admins'?'amobile':'smobile').value="";
+    showMsg("✅ Admin Successful ভাবে Add হয়েছে");
   }, {onlyOnce: true});
 }
-
-window.delAdmin = function(id){ if(confirm("ডিলিট করবা?")) remove(ref(db,'admins/'+id)); }
-
+window.delAdmin = function(id,type){ if(confirm("ডিলিট করবা?")) remove(ref(db,type+'/'+id)); }
 window.addProduct = function(){ 
-  const n=document.getElementById('pname').value; 
-  const p=document.getElementById('pprice').value; 
-  const i=document.getElementById('pimg').value;
-  const d=document.getElementById('pdesc').value;
+  const n=document.getElementById('pname').value; const p=document.getElementById('pprice').value; 
+  const i=document.getElementById('pimg').value; const d=document.getElementById('pdesc').value;
   if(n==""||p==""){alert("নাম আর দাম দাও");return;} 
   push(ref(db,'products'),{name:n, price:p, img:i, desc:d}); 
-  document.getElementById('pname').value=""; 
-  document.getElementById('pprice').value=""; 
-  document.getElementById('pimg').value=""; 
-  document.getElementById('pdesc').value="";
-  alert("অ্যাড হয়ে গেছে ✅"); 
+  document.getElementById('pname').value=""; document.getElementById('pprice').value=""; document.getElementById('pimg').value=""; document.getElementById('pdesc').value="";
+  showMsg("✅ প্রোডাক্ট Add হয়েছে"); 
 }
-
 window.delProd = function(id){ if(confirm("ডিলিট করবা?")) remove(ref(db,'products/'+id)); }
+
+window.replyTicket = function(id){
+  const replyText = document.getElementById(`reply-${id}`).value;
+  if(replyText==""){alert("রিপ্লাই লিখুন");return;}
+  update(ref(db,'tickets/'+id),{reply:replyText, status:"Replied", repliedBy: currentAdminName});
+  showMsg("✅ রিপ্লাই সেভ হয়েছে। কাস্টমার দেখতে পারবে");
+}
 </script>
 </body>
 </html>
