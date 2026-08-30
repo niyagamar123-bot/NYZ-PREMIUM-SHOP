@@ -2,18 +2,30 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<title>Staff Panel - Aura Shop</title>
+<title>Support Panel - Login</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body{background:#111;color:white;font-family:'Hind Siliguri';padding:20px}
-.ticket{background:#1a1a1a;padding:15px;margin:15px 0;border-radius:12px;border-left:4px solid #ff6600}
-input,button{padding:12px;margin:8px 0;border-radius:8px;border:none;width:100%;font-size:15px}
+body{background:#111;color:white;font-family:'Hind Siliguri';padding:20px;display:flex;justify-content:center;align-items:center;height:90vh}
+.login-box{background:#1a1a1a;padding:25px;border-radius:12px;width:100%;max-width:400px;border:2px solid #ff6600}
+input,button{padding:12px;margin:10px 0;border-radius:8px;border:none;width:100%;font-size:15px}
 button{background:#ff6600;color:white;font-weight:700;cursor:pointer}
+#panel{display:none}
+.ticket{background:#222;padding:15px;margin:15px 0;border-radius:12px;border-left:4px solid #ff6600}
 </style>
 </head>
 <body>
-<h2 style="color:#ff6600;text-align:center">👨‍💼 Staff Support Panel</h2>
+
+<div class="login-box" id="login">
+<h2 style="color:#ff6600;text-align:center">🔒 Staff Login</h2>
+<input type="password" id="pass" placeholder="পাসওয়ার্ড দিন">
+<button onclick="checkPass()">Login</button>
+<p id="error" style="color:red;text-align:center"></p>
+</div>
+
+<div id="panel">
+<h2 style="color:#ff6600;text-align:center">👨‍💼 Support Panel</h2>
 <div id="tickets">Loading...</div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -21,8 +33,20 @@ import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/fireb
 const firebaseConfig = {apiKey: "AIzaSyAeL4HVPaea7ZCfI3jg1HFcJlv1nxnOm8g", authDomain: "aura-premium-shop.firebaseapp.com", databaseURL: "https://aura-premium-shop-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "aura-premium-shop", storageBucket: "aura-premium-shop.firebasestorage.app", messagingSenderId: "716630218001", appId: "1:716630218001:web:74abbe23e91048877568b0"};
 const app = initializeApp(firebaseConfig); const db = getDatabase(app);
 
-const STAFF_NAME = prompt("আপনার নাম লিখুন:"); // Staff এর নাম
+const CORRECT_PASS = "Niyaz123@"; // এখানে পাসওয়ার্ড
 
+window.checkPass = function(){
+const pass = document.getElementById('pass').value;
+if(pass === CORRECT_PASS){
+document.getElementById('login').style.display = 'none';
+document.getElementById('panel').style.display = 'block';
+loadTickets();
+}else{
+document.getElementById('error').innerText = "ভুল পাসওয়ার্ড!";
+}
+}
+
+function loadTickets(){
 onValue(ref(db, 'tickets'), (snapshot) => {
 let html = "";
 snapshot.forEach((child) => {
@@ -32,20 +56,21 @@ html += `<div class="ticket">
 <b>Name:</b> ${t.name}<br>
 <b>Mobile:</b> ${t.mobile}<br>
 <b>Problem:</b> ${t.problem}<br>
-<b>Status:</b> ${t.status}<br>
+${t.reply ? `<p style="color:#00ff88"><b>${t.repliedBy} এর রিপ্লাই:</b> ${t.reply}</p>` : ''}
 <input id="reply-${child.key}" placeholder="রিপ্লাই লিখুন">
 <button onclick="sendReply('${child.key}')">রিপ্লাই পাঠান</button>
 </div>`;
 });
-document.getElementById('tickets').innerHTML = html;
+document.getElementById('tickets').innerHTML = html || "কোনো টিকেট নাই";
 });
+}
 
 window.sendReply = function(ticketId){
 const replyText = document.getElementById(`reply-${ticketId}`).value;
 if(replyText === ""){alert("রিপ্লাই লিখুন");return;}
 update(ref(db, 'tickets/' + ticketId), {
 reply: replyText,
-repliedBy: "Staff - " + STAFF_NAME,
+repliedBy: "Admin", // ক্রেতা শুধু Admin দেখবে
 status: "Replied"
 });
 alert("রিপ্লাই পাঠানো হয়েছে ✅");
