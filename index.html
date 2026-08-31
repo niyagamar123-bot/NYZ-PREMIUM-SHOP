@@ -58,84 +58,118 @@ hr{border:1px solid #333;margin:15px 0}
 </div>
 </div></div>
 
-<!-- বাকি Popup গুলা -->
+<!-- Order Admin Panel -->
 <div id="orderAdminPanel" class="popup"><div class="popup-content"><span class="close" onclick="closePopup('orderAdminPanel')">&times;</span><h3>Order Admin Login</h3><input id="orderAdminPass" type="password" placeholder="Password: niyaz@@"><button onclick="loginOrderAdmin()">Login</button><div id="orderAdminBody" style="display:none"><h4>আমার অর্ডার</h4><div id="myOrders"></div></div></div></div>
+
+<!-- Support Admin Panel -->
 <div id="supportAdminPanel" class="popup"><div class="popup-content"><span class="close" onclick="closePopup('supportAdminPanel')">&times;</span><h3>Support Admin Login</h3><input id="supportAdminPass" type="password" placeholder="Password: Niyz@@@"><button onclick="loginSupportAdmin()">Login</button><div id="supportAdminBody" style="display:none"><h4>আমার সাপোর্ট টিকেট</h4><div id="mySupport"></div></div></div></div>
+
+<!-- Order Popup -->
 <div id="orderPopup" class="popup"><div class="popup-content"><span class="close" onclick="closePopup('orderPopup')">&times;</span><h3>অর্ডার কনফার্ম করুন</h3><input id="oname" placeholder="আপনার নাম"><input id="omobile" placeholder="আপনার মোবাইল"><textarea id="oaddr" placeholder="আপনার ঠিকানা"></textarea><button onclick="placeOrder()">WhatsApp এ অর্ডার দিন</button></div></div>
+
+<!-- Support Popup -->
 <div id="supportPopup" class="popup"><div class="popup-content"><span class="close" onclick="closePopup('supportPopup')">&times;</span><h3>সাপোর্ট টিকেট</h3><input id="sname" placeholder="নাম"><input id="smobile" placeholder="মোবাইল"><select id="sissue"><option>সমস্যা সিলেক্ট করুন</option><option>প্রোডাক্ট ইস্যু</option><option>পেমেন্ট ইস্যু</option><option>অন্যান্য</option></select><input id="strxid" placeholder="TrxID যদি থাকে"><input id="sscreenshot" placeholder="Screenshot URL"><button onclick="submitSupport()">সাপোর্টে পাঠান</button></div></div>
+
+<!-- Reply Form -->
 <div id="replyForm" class="popup"><div class="popup-content"><h3 id="replyTitle">Reply</h3><input id="replyInput" placeholder="TrxID / Details লিখুন"><button onclick="submitReply()">Submit</button></div></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
 const firebaseConfig = {apiKey: "AIzaSyAeL4HVPaea7ZCfI3jg1HFcJlv1nxnOm8g", authDomain: "aura-premium-shop.firebaseapp.com", databaseURL: "https://aura-premium-shop-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "aura-premium-shop", storageBucket: "aura-premium-shop.firebasestorage.app", messagingSenderId: "716630218001", appId: "1:716630218001:web:74abbe23e91048877568b0"};
-const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-let currentProduct = null; let orderAdmins = []; let supportAdmins = []; let replyType = ""; let replyId = "";
+const app = initializeApp(firebaseConfig); 
+const db = getDatabase(app);
 
-const urlParams = new URLSearchParams(window.location.search);
-if(urlParams.has('admin')){ document.getElementById('adminPanel').style.display='flex'; }
-if(urlParams.has('orderadmin')){ document.getElementById('orderAdminPanel').style.display='flex'; }
-if(urlParams.has('supportadmin')){ document.getElementById('supportAdminPanel').style.display='flex'; }
-if(urlParams.has('replyOrder')){ replyType="order"; replyId=urlParams.get('replyOrder'); document.getElementById('replyTitle').innerText="TrxID জমা দিন"; document.getElementById('replyForm').style.display='flex'; }
-if(urlParams.has('replySupport')){ replyType="support"; replyId=urlParams.get('replySupport'); document.getElementById('replyTitle').innerText="সমস্যার Details লিখুন"; document.getElementById('replyForm').style.display='flex'; }
+let currentProduct = null; 
+let orderAdmins = []; 
+let supportAdmins = []; 
+let replyType = ""; 
+let replyId = "";
 
-window.submitReply = function(){ const val = document.getElementById('replyInput').value; if(!val){alert("লিখুন");return;} if(replyType=="order"){ update(ref(db,'orders/'+replyId),{trxid:val}); alert("TrxID জমা হয়েছে"); } if(replyType=="support"){ update(ref(db,'supportTickets/'+replyId),{customerReply:val}); alert("Reply জমা হয়েছে"); } closePopup('replyForm'); }
+document.addEventListener("DOMContentLoaded", function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if(urlParams.has('admin')){ document.getElementById('adminPanel').style.display='flex'; }
+  if(urlParams.has('orderadmin')){ document.getElementById('orderAdminPanel').style.display='flex'; }
+  if(urlParams.has('supportadmin')){ document.getElementById('supportAdminPanel').style.display='flex'; }
+  if(urlParams.has('replyOrder')){ replyType="order"; replyId=urlParams.get('replyOrder'); document.getElementById('replyTitle').innerText="TrxID জমা দিন"; document.getElementById('replyForm').style.display='flex'; }
+  if(urlParams.has('replySupport')){ replyType="support"; replyId=urlParams.get('replySupport'); document.getElementById('replyTitle').innerText="সমস্যার Details লিখুন"; document.getElementById('replyForm').style.display='flex'; }
+});
+
+window.submitReply = function(){ 
+  const val = document.getElementById('replyInput').value; 
+  if(!val){alert("লিখুন");return;} 
+  if(replyType=="order"){ update(ref(db,'orders/'+replyId),{trxid:val}); alert("TrxID জমা হয়েছে"); } 
+  if(replyType=="support"){ update(ref(db,'supportTickets/'+replyId),{customerReply:val}); alert("Reply জমা হয়েছে"); } 
+  closePopup('replyForm'); 
+}
 
 onValue(ref(db, 'products'), (s) => {
-const div = document.getElementById('products'); div.innerHTML="";
-if(s.exists()) s.forEach((c) => {
-const p = c.val();
-let deleteBtn = urlParams.has('admin') ? `<button class="delete-btn" onclick="deleteProduct('${c.key}')">Delete</button>` : '';
-div.innerHTML += `<div class="product">${deleteBtn}<img src="${p.img}"><h3>${p.name}</h3><p>দাম: ${p.price} TK</p><p class="desc">${p.desc || 'কোনো ডিসক্রিপশন নাই'}</p><button onclick="openOrder('${c.key}','${p.name}',${p.price})">Order Now</button></div>`;
-});
+  const div = document.getElementById('products'); div.innerHTML="";
+  const urlParams = new URLSearchParams(window.location.search);
+  if(s.exists()) s.forEach((c) => {
+    const p = c.val();
+    let deleteBtn = urlParams.has('admin') ? `<button class="delete-btn" onclick="deleteProduct('${c.key}')">Delete</button>` : '';
+    div.innerHTML += `<div class="product">${deleteBtn}<img src="${p.img}"><h3>${p.name}</h3><p>দাম: ${p.price} TK</p><p class="desc">${p.desc || 'কোনো ডিসক্রিপশন নাই'}</p><button onclick="openOrder('${c.key}','${p.name}',${p.price})">Order Now</button></div>`;
+  });
 });
 
 onValue(ref(db, 'orderAdmins'), (s) => { orderAdmins = []; if(s.exists()) s.forEach(c=>orderAdmins.push({id:c.key, ...c.val()})); });
 onValue(ref(db, 'supportAdmins'), (s) => { supportAdmins = []; if(s.exists()) s.forEach(c=>supportAdmins.push({id:c.key, ...c.val()})); });
 
 onValue(ref(db, 'orders'), (s) => { 
-let html=""; if(s.exists()) s.forEach(c=>{let o=c.val(); html+=`<div class="reply-box"><b>Order:</b> ${o.productName}<br><b>Customer:</b> ${o.customerMobile}<br><b>TrxID:</b> ${o.trxid||'দেয়নি'}<br><b>Admin:</b> ${o.adminName}</div>`}); 
-document.getElementById('allOrders').innerHTML=html; document.getElementById('myOrders').innerHTML=html; 
+  let html=""; if(s.exists()) s.forEach(c=>{let o=c.val(); html+=`<div class="reply-box"><b>Order:</b> ${o.productName}<br><b>Customer:</b> ${o.customerMobile}<br><b>TrxID:</b> ${o.trxid||'দেয়নি'}<br><b>Admin:</b> ${o.adminName}</div>`}); 
+  document.getElementById('allOrders').innerHTML=html; document.getElementById('myOrders').innerHTML=html; 
 });
 
-onValue(ref(db, 'supportTickets'), (s) => { let html=""; if(s.exists()) s.forEach(c=>{let o=c.val(); html+=`<div class="reply-box"><b>Support:</b> ${o.issue}<br><b>Customer:</b> ${o.mobile}<br><b>Reply:</b> ${o.customerReply||'দেয়নি'}</div>`}); document.getElementById('allSupport').innerHTML=html; document.getElementById('mySupport').innerHTML=html; });
+onValue(ref(db, 'supportTickets'), (s) => { 
+  let html=""; if(s.exists()) s.forEach(c=>{let o=c.val(); html+=`<div class="reply-box"><b>Support:</b> ${o.issue}<br><b>Customer:</b> ${o.mobile}<br><b>Reply:</b> ${o.customerReply||'দেয়নি'}</div>`}); 
+  document.getElementById('allSupport').innerHTML=html; document.getElementById('mySupport').innerHTML=html; 
+});
 
 window.openOrder = (id,name,price)=>{ currentProduct={id,name,price}; document.getElementById('orderPopup').style.display='flex'; }
 window.closePopup = (id)=> document.getElementById(id).style.display='none';
 window.openSupport = ()=> document.getElementById('supportPopup').style.display='flex';
 
 window.addProduct = function(){
-const name=document.getElementById('pName').value; 
-const price=document.getElementById('pPrice').value; 
-const img=document.getElementById('pImg').value; 
-const desc=document.getElementById('pDesc').value;
-if(!name||!price||!img){alert("নাম, দাম, ছবি URL দিন");return;}
-push(ref(db,'products'),{name,price,img,desc}); 
-alert("✅ Product Added");
-document.getElementById('pName').value="";document.getElementById('pPrice').value="";document.getElementById('pImg').value="";document.getElementById('pDesc').value="";
+  const name=document.getElementById('pName').value; 
+  const price=document.getElementById('pPrice').value; 
+  const img=document.getElementById('pImg').value; 
+  const desc=document.getElementById('pDesc').value;
+  if(!name||!price||!img){alert("নাম, দাম, ছবি URL দিন");return;}
+  push(ref(db,'products'),{name,price,img,desc}); 
+  alert("✅ Product Added");
+  document.getElementById('pName').value="";document.getElementById('pPrice').value="";document.getElementById('pImg').value="";document.getElementById('pDesc').value="";
 }
 
-window.deleteProduct = function(id){ // নতুন Delete ফাংশন
-if(confirm("Product Delete করবেন?")){
-remove(ref(db,'products/'+id));
-alert("✅ Product Deleted");
-}
+window.deleteProduct = function(id){
+  if(confirm("Product Delete করবেন?")){
+    remove(ref(db,'products/'+id));
+    alert("✅ Product Deleted");
+  }
 }
 
 window.placeOrder = async function(){
-const name=document.getElementById('oname').value; const mobile=document.getElementById('omobile').value; const addr=document.getElementById('oaddr').value;
-if(!name||!mobile||!addr){alert("সব দিন");return;}
-orderAdmins.forEach((admin,i)=>{
-const orderData = {productName: currentProduct.name, productPrice: currentProduct.price, customerName:name, customerMobile:mobile, addr, status:"Pending", adminId:admin.id, adminName:admin.name, trxid:"", time:new Date().toLocaleString("bn-BD")};
-const orderId = push(ref(db,'orders'),orderData).key;
-let adminMsg = `নতুন অর্ডার 🔥%0AOrderID: ${orderId}%0AProduct: ${currentProduct.name}%0AName: ${name}%0AMobile: ${mobile}`;
-setTimeout(()=> window.open(`https://wa.me/${admin.mobile}?text=${adminMsg}`, '_blank'), i*1500);
-setTimeout(()=>{ let customerMsg = `ধন্যবাদ ${name} অর্ডারের জন্য।%0Aএডমিন: ${admin.name}%0APayment: ${admin.bkash}%0A%0ATrxID দিন: ${window.location.origin}${window.location.pathname}?replyOrder=${orderId}`; window.open(`https://wa.me/${mobile}?text=${customerMsg}`, '_blank'); }, i*1500 + 2000);
-});
-alert("✅ অর্ডার সাবমিট"); closePopup('orderPopup');
+  const name=document.getElementById('oname').value; const mobile=document.getElementById('omobile').value; const addr=document.getElementById('oaddr').value;
+  if(!name||!mobile||!addr){alert("সব দিন");return;}
+  orderAdmins.forEach((admin,i)=>{
+    const orderData = {productName: currentProduct.name, productPrice: currentProduct.price, customerName:name, customerMobile:mobile, addr, status:"Pending", adminId:admin.id, adminName:admin.name, trxid:"", time:new Date().toLocaleString("bn-BD")};
+    const orderId = push(ref(db,'orders'),orderData).key;
+    let adminMsg = `নতুন অর্ডার 🔥%0AOrderID: ${orderId}%0AProduct: ${currentProduct.name}%0AName: ${name}%0AMobile: ${mobile}`;
+    setTimeout(()=> window.open(`https://wa.me/${admin.mobile}?text=${adminMsg}`, '_blank'), i*1500);
+    setTimeout(()=>{ let customerMsg = `ধন্যবাদ ${name} অর্ডারের জন্য।%0Aএডমিন: ${admin.name}%0APayment: ${admin.bkash}%0A%0ATrxID দিন: ${window.location.origin}${window.location.pathname}?replyOrder=${orderId}`; window.open(`https://wa.me/${mobile}?text=${customerMsg}`, '_blank'); }, i*1500 + 2000);
+  });
+  alert("✅ অর্ডার সাবমিট"); closePopup('orderPopup');
 }
 
-window.submitSupport = function(){ const name=document.getElementById('sname').value; const mobile=document.getElementById('smobile').value; const issue=document.getElementById('sissue').value; const ticketId = push(ref(db,'supportTickets'),{name,mobile,issue,trxid:document.getElementById('strxid').value,ss:document.getElementById('sscreenshot').value,customerReply:"",time:new Date().toLocaleString("bn-BD")}).key; supportAdmins.forEach(c=> window.open(`https://wa.me/${c.mobile}?text=নতুন সাপোর্ট: ${ticketId} - ${issue} - ${mobile}`,'_blank')); setTimeout(()=>{ let botMsg = `ধন্যবাদ।%0ADetails দিন: ${window.location.origin}${window.location.pathname}?replySupport=${ticketId}`; window.open(`https://wa.me/${mobile}?text=${botMsg}`,'_blank'); },2000); alert("সাপোর্ট টিকেট গেছে"); closePopup('supportPopup'); }
+window.submitSupport = function(){ 
+  const name=document.getElementById('sname').value; const mobile=document.getElementById('smobile').value; const issue=document.getElementById('sissue').value; 
+  const ticketId = push(ref(db,'supportTickets'),{name,mobile,issue,trxid:document.getElementById('strxid').value,ss:document.getElementById('sscreenshot').value,customerReply:"",time:new Date().toLocaleString("bn-BD")}).key; 
+  supportAdmins.forEach(c=> window.open(`https://wa.me/${c.mobile}?text=নতুন সাপোর্ট: ${ticketId} - ${issue} - ${mobile}`,'_blank')); 
+  setTimeout(()=>{ let botMsg = `ধন্যবাদ।%0ADetails দিন: ${window.location.origin}${window.location.pathname}?replySupport=${ticketId}`; window.open(`https://wa.me/${mobile}?text=${botMsg}`,'_blank'); },2000); 
+  alert("সাপোর্ট টিকেট গেছে"); closePopup('supportPopup'); 
+}
+
 window.loginMainAdmin = ()=>{ if(document.getElementById('adminPass').value=="Niyaz@@@@"){ document.getElementById('adminBody').style.display='block'; }else alert("Wrong Password"); }
 window.loginOrderAdmin = ()=>{ if(document.getElementById('orderAdminPass').value=="niyaz@@"){ document.getElementById('orderAdminBody').style.display='block'; }else alert("Wrong Password"); }
 window.loginSupportAdmin = ()=>{ if(document.getElementById('supportAdminPass').value=="Niyz@@@"){ document.getElementById('supportAdminBody').style.display='block'; }else alert("Wrong Password"); }
