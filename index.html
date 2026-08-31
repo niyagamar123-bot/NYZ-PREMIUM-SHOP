@@ -1,149 +1,180 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-<meta charset="UTF-8">
-<title>AURA SHOP</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aura Shop</title>
 <style>
-body{font-family:'Arial',sans-serif;background:#0f0f0f;color:white;text-align:center;padding:20px;margin:0}
-.product{background:#1a1a1a;padding:20px;margin:15px;border-radius:15px;display:inline-block;width:300px;box-shadow:0 0 10px #ff660044;vertical-align:top;text-align:left}
-input,button,textarea,select{padding:12px;margin:8px;border-radius:8px;border:none;width:90%;font-size:16px;background:#333;color:white}
-textarea{height:60px;resize:vertical}
-button{background:#ff6600;color:white;cursor:pointer;font-weight:bold}
-button:hover{background:#ff8800}
-h1{color:#ff6600;font-size:32px;text-align:center}
-.footer{background:#1a1a1a;padding:20px;margin-top:40px;border-radius:15px;text-align:left;max-width:500px;margin-left:auto;margin-right:auto}
-.support-box{background:#222;border:2px solid #ff6600;padding:15px;border-radius:10px;margin:15px 0;cursor:pointer;text-align:center}
-img{border-radius:10px;width:100%;margin-bottom:10px}
-.desc{font-size:14px;color:#ccc;margin:10px 0;line-height:1.6}
+:root { --bg: #0d0d0d; --main: #ff3333; }
+body{background:var(--bg);color:white;font-family:Inter;padding:20px;margin:0}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.product{background:#1a1a1a;padding:15px;border-radius:15px;text-align:center}
+.product img{width:100%;height:200px;object-fit:cover;border-radius:10px}
+input,button,textarea,select{padding:12px;margin:8px 0;border-radius:8px;border:none;width:95%;background:#222;color:white}
+button{background:var(--main);font-weight:bold;cursor:pointer}
 .popup{position:fixed;top:0;left:0;width:100%;height:100%;background:#000c;display:none;justify-content:center;align-items:center;z-index:999}
-.popup-content{background:#1a1a1a;padding:20px;border-radius:15px;width:90%;max-width:450px;text-align:left}
+.popup-content{background:#1a1a1a;padding:20px;border-radius:15px;width:90%;max-width:400px}
 .close{float:right;color:red;font-size:24px;cursor:pointer}
-.reply-box{background:#222;padding:10px;border-radius:8px;margin-top:10px;border-left:3px solid #00ff88}
-label{font-size:14px;color:#ccc;text-align:left;display:block;margin-top:5px}
-small{font-size:12px;color:#888}
+.reply-box{background:#111;padding:10px;margin-top:10px;border-left:3px solid var(--main);font-size:14px}
 </style>
 </head>
 <body>
-<h1>🔥 AURA SHOP 🔥</h1>
-<div id="products"><p style="text-align:center">Loading...</p></div>
-<p id="status" style="color:lime;font-size:18px;text-align:center"></p>
 
-<div class="footer">
-<h3>🛡️ সাপোর্ট সেন্টার</h3>
-<div class="support-box" onclick="openSupport()"><b>সমস্যা আছে? টিকেট জমা দিন</b></div>
-<div id="myTickets"></div>
-</div>
+<h1 style="text-align:center;color:var(--main)">🔥 AURA SHOP 🔥</h1>
+<div id="products" class="product-grid">Loading...</div>
 
-<!-- Support Ticket Popup -->
+<button onclick="openAdminPanel()">Main Admin</button>
+<button onclick="openOrderAdminPanel()">Order Admin</button>
+<button onclick="openSupportAdminPanel()">Support Admin</button>
+<button onclick="openSupport()">Support</button>
+
+<!-- Reply Form for URL -->
+<div id="replyForm" class="popup"><div class="popup-content">
+<h3 id="replyTitle">Reply</h3>
+<input id="replyInput" placeholder="TrxID / সমস্যার Details লিখুন">
+<button onclick="submitReply()">Submit</button>
+</div></div>
+
+<!-- Order Popup -->
+<div id="orderPopup" class="popup"><div class="popup-content">
+<span class="close" onclick="closePopup('orderPopup')">&times;</span>
+<h3>অর্ডার কনফার্ম করুন</h3>
+<input id="oname" placeholder="আপনার নাম">
+<input id="omobile" placeholder="আপনার মোবাইল">
+<textarea id="oaddr" placeholder="আপনার ঠিকানা"></textarea>
+<button onclick="placeOrder()">WhatsApp এ অর্ডার দিন</button>
+</div></div>
+
+<!-- Support Popup -->
 <div id="supportPopup" class="popup"><div class="popup-content">
-<span class="close" onclick="closeSupport()">&times;</span>
-<h3>সাপোর্ট টিকেট জমা দিন</h3>
-<input id="sname" placeholder="আপনার নাম">
-<input id="smobile" placeholder="অর্ডারের মোবাইল নাম্বার">
-<select id="sproduct"><option>প্রোডাক্ট সিলেক্ট করুন</option></select>
-<textarea id="sproblem" placeholder="সমস্যাটি বিস্তারিত লিখুন"></textarea>
+<span class="close" onclick="closePopup('supportPopup')">&times;</span>
+<h3>সাপোর্ট টিকেট</h3>
+<input id="sname" placeholder="নাম">
+<input id="smobile" placeholder="মোবাইল">
+<select id="sissue"><option>সমস্যা সিলেক্ট করুন</option><option>প্রোডাক্ট ইস্যু</option><option>পেমেন্ট ইস্যু</option><option>অন্যান্য</option></select>
+<input id="strxid" placeholder="TrxID যদি থাকে">
+<input id="sscreenshot" placeholder="Screenshot URL">
+<button onclick="submitSupport()">সাপোর্টে পাঠান</button>
+</div></div>
 
-<label>ট্রানজেকশন আইডি / TrxID</label>
-<input type="text" id="strxid" placeholder="যেমন: 8D3A9B2C1D">
+<!-- Main Admin Panel -->
+<div id="adminPanel" class="popup"><div class="popup-content">
+<span class="close" onclick="closePopup('adminPanel')">&times;</span>
+<h3>Main Admin Login</h3>
+<input id="adminPass" type="password" placeholder="Password: Niyaz@@@@">
+<button onclick="loginMainAdmin()">Login</button>
+<div id="adminBody" style="display:none">
+<h4>Add Order Admin</h4>
+<input id="aName" placeholder="Admin Name">
+<input id="aMobile" placeholder="Admin WhatsApp 8801...">
+<input id="aBkash" placeholder="Admin Bkash/Nagad">
+<button onclick="addAdmin()">Add</button>
+<h4>Add Support Admin</h4>
+<input id="sAName" placeholder="Support Admin Name">
+<input id="sAMobile" placeholder="Support Admin WhatsApp">
+<button onclick="addSupportAdmin()">Add</button>
+<h4>All Orders</h4><div id="allOrders"></div>
+<h4>All Support</h4><div id="allSupport"></div>
+</div>
+</div></div>
 
-<label>পেমেন্ট স্ক্রিনশটের লিংক</label>
-<input type="text" id="sscreenshotURL" placeholder="https://imgur.com/xxx.jpg">
-<small>নোট: https://imgur.com এ গিয়ে ছবি আপলোড করে লিংক দিন</small>
+<!-- Order Admin Panel -->
+<div id="orderAdminPanel" class="popup"><div class="popup-content">
+<span class="close" onclick="closePopup('orderAdminPanel')">&times;</span>
+<h3>Order Admin Login</h3>
+<input id="orderAdminPass" type="password" placeholder="Password: niyaz@@">
+<button onclick="loginOrderAdmin()">Login</button>
+<div id="orderAdminBody" style="display:none"><h4>আমার অর্ডার</h4><div id="myOrders"></div></div>
+</div></div>
 
-<button onclick="submitTicket()">টিকেট সাবমিট করুন</button>
+<!-- Support Admin Panel -->
+<div id="supportAdminPanel" class="popup"><div class="popup-content">
+<span class="close" onclick="closePopup('supportAdminPanel')">&times;</span>
+<h3>Support Admin Login</h3>
+<input id="supportAdminPass" type="password" placeholder="Password: Niyz@@@">
+<button onclick="loginSupportAdmin()">Login</button>
+<div id="supportAdminBody" style="display:none"><h4>আমার সাপোর্ট টিকেট</h4><div id="mySupport"></div></div>
 </div></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, push, onValue, get, set, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 const firebaseConfig = {apiKey: "AIzaSyAeL4HVPaea7ZCfI3jg1HFcJlv1nxnOm8g", authDomain: "aura-premium-shop.firebaseapp.com", databaseURL: "https://aura-premium-shop-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "aura-premium-shop", storageBucket: "aura-premium-shop.firebasestorage.app", messagingSenderId: "716630218001", appId: "1:716630218001:web:74abbe23e91048877568b0"};
 const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-const ORDER_WHATSAPP = "8801908807313"; // Main Admin
-const SUPPORT_WHATSAPP = "8801965067388"; // Main Support
-let allProducts = [];
+let currentProduct = null; let orderAdmins = []; let supportAdmins = [];
+let replyType = ""; let replyId = "";
 
-onValue(ref(db, 'products'), (snapshot) => {
-const productsDiv = document.getElementById('products');
-productsDiv.innerHTML = ""; allProducts=[];
-if(snapshot.exists()){
-snapshot.forEach((child) => {
-const p = child.val(); p.id=child.key; allProducts.push(p);
-let imgTag = p.img ? `<img src="${p.img}">` : '';
-productsDiv.innerHTML += `<div class="product">${imgTag}<h2>${p.name}</h2><p style="font-size:20px;color:#ff6600">দাম: ${p.price} TK</p><p class="desc"><b>বিবরণ:</b><br>${p.desc || ''}</p> 
-<input id="cname-${child.key}" type="text" placeholder="আপনার নাম"> 
-<input id="cmobile-${child.key}" type="tel" placeholder="মোবাইল 01XXXXXXXXX"> 
-<textarea id="caddr-${child.key}" placeholder="আপনার ঠিকানা"></textarea> 
-<button onclick="order('${child.key}','${p.name}', ${p.price})">Order Now</button></div>`;
-let opt = document.createElement('option'); opt.value=p.name; opt.innerText=p.name; document.getElementById('sproduct').appendChild(opt);
+// URL থেকে Reply ধরবে
+const urlParams = new URLSearchParams(window.location.search);
+if(urlParams.has('replyOrder')){ replyType="order"; replyId=urlParams.get('replyOrder'); document.getElementById('replyTitle').innerText="TrxID জমা দিন"; document.getElementById('replyForm').style.display='flex'; }
+if(urlParams.has('replySupport')){ replyType="support"; replyId=urlParams.get('replySupport'); document.getElementById('replyTitle').innerText="সমস্যার Details লিখুন"; document.getElementById('replyForm').style.display='flex'; }
+
+window.submitReply = function(){
+const val = document.getElementById('replyInput').value;
+if(!val){alert("লিখুন");return;}
+if(replyType=="order"){ update(ref(db,'orders/'+replyId),{trxid:val}); alert("TrxID জমা হয়েছে"); }
+if(replyType=="support"){ update(ref(db,'supportTickets/'+replyId),{customerReply:val}); alert("Reply জমা হয়েছে"); }
+closePopup('replyForm');
+}
+
+onValue(ref(db, 'products'), (s) => {
+const div = document.getElementById('products'); div.innerHTML="";
+if(s.exists()) s.forEach((c) => {
+const p = c.val();
+div.innerHTML += `<div class="product"><img src="${p.img}"><h3>${p.name}</h3><p>দাম: ${p.price} TK</p><button onclick="openOrder('${c.key}','${p.name}',${p.price})">Order Now</button></div>`;
 });
-} else { productsDiv.innerHTML = "<p style='color:red;text-align:center'>শীঘ্রই প্রোডাক্ট আসবে</p>"; }
 });
 
-window.order = async function(id, item, price){
-const name = document.getElementById(`cname-${id}`).value;
-const mobile = document.getElementById(`cmobile-${id}`).value;
-const addr = document.getElementById(`caddr-${id}`).value;
-if(name === "" || mobile === "" || addr === ""){ alert("নাম, মোবাইল, ঠিকানা সব দিন"); return; }
-const orderId = push(ref(db, 'orders'), {name: name, item: item, price: price, mobile: mobile, address: addr, time: new Date().toLocaleString("bn-BD")}).key;
-document.getElementById('status').innerText = "✅ অর্ডার সফল! সকল এডমিনকে নোটিফাই করা হচ্ছে...";
-document.getElementById(`cname-${id}`).value = ""; document.getElementById(`cmobile-${id}`).value = ""; document.getElementById(`caddr-${id}`).value = "";
-let message = `নতুন অর্ডার 🔥%0AOrderID: ${orderId}%0AName: ${name}%0AProduct: ${item}%0APrice: ${price}TK%0AMobile: ${mobile}%0AAddress: ${addr}%0ATime: ${new Date().toLocaleString("bn-BD")}`;
-window.open(`https://wa.me/${ORDER_WHATSAPP}?text=${message}`, '_blank');
-const adminsSnap = await get(ref(db, 'admins'));
-if(adminsSnap.exists()){ let i = 1; adminsSnap.forEach(c=>{ let adminMobile = c.val().mobile.replace(/^0/, '88'); setTimeout(()=>{ window.open(`https://wa.me/${adminMobile}?text=${message}`, '_blank'); }, i * 1000); i++; }) }
-loadMyTickets(mobile);
+onValue(ref(db, 'orderAdmins'), (s) => { orderAdmins = []; if(s.exists()) s.forEach(c=>orderAdmins.push({id:c.key, ...c.val()})); });
+onValue(ref(db, 'supportAdmins'), (s) => { supportAdmins = []; if(s.exists()) s.forEach(c=>supportAdmins.push({id:c.key, ...c.val()})); });
+
+onValue(ref(db, 'orders'), (s) => { 
+let html=""; if(s.exists()) s.forEach(c=>{let o=c.val(); html+=`<div class="reply-box"><b>Order:</b> ${o.product}<br><b>Customer:</b> ${o.customerMobile}<br><b>TrxID:</b> ${o.trxid||'দেয়নি'}<br><b>Admin:</b> ${o.adminName}</div>`}); 
+document.getElementById('allOrders').innerHTML=html; 
+document.getElementById('myOrders').innerHTML=html; // Order admin ও দেখবে
+});
+
+onValue(ref(db, 'supportTickets'), (s) => { 
+let html=""; if(s.exists()) s.forEach(c=>{let o=c.val(); html+=`<div class="reply-box"><b>Support:</b> ${o.issue}<br><b>Customer:</b> ${o.mobile}<br><b>Reply:</b> ${o.customerReply||'দেয়নি'}</div>`}); 
+document.getElementById('allSupport').innerHTML=html; 
+document.getElementById('mySupport').innerHTML=html; // Support admin ও দেখবে
+});
+
+window.openOrder = (id,name,price)=>{ currentProduct={id,name,price}; document.getElementById('orderPopup').style.display='flex'; }
+window.closePopup = (id)=> document.getElementById(id).style.display='none';
+window.openAdminPanel = ()=> document.getElementById('adminPanel').style.display='flex';
+window.openOrderAdminPanel = ()=> document.getElementById('orderAdminPanel').style.display='flex';
+window.openSupportAdminPanel = ()=> document.getElementById('supportAdminPanel').style.display='flex';
+window.openSupport = ()=> document.getElementById('supportPopup').style.display='flex';
+
+window.placeOrder = async function(){
+const name=document.getElementById('oname').value;
+const mobile=document.getElementById('omobile').value;
+const addr=document.getElementById('oaddr').value;
+if(!name||!mobile||!addr){alert("সব দিন");return;}
+
+orderAdmins.forEach((admin,i)=>{
+const orderId = push(ref(db,'orders'),{...currentProduct,customerName:name,customerMobile:mobile,addr,status:"Pending",adminId:admin.id,adminName:admin.name,trxid:"",time:new Date().toLocaleString("bn-BD")}).key;
+let adminMsg = `নতুন অর্ডার 🔥%0AOrderID: ${orderId}%0AProduct: ${currentProduct.name}%0AName: ${name}%0AMobile: ${mobile}`;
+setTimeout(()=> window.open(`https://wa.me/${admin.mobile}?text=${adminMsg}`, '_blank'), i*1500);
+setTimeout(()=>{ let customerMsg = `ধন্যবাদ ${name} অর্ডারের জন্য।%0Aএডমিন: ${admin.name}%0APayment: ${admin.bkash}%0A%0ATrxID দিন: ${window.location.origin}${window.location.pathname}?replyOrder=${orderId}`; window.open(`https://wa.me/${mobile}?text=${customerMsg}`, '_blank'); }, i*1500 + 2000);
+});
+alert("✅ অর্ডার সাবমিট"); closePopup('orderPopup');
 }
 
-// Support Ticket
-window.openSupport = function(){ document.getElementById('supportPopup').style.display = 'flex'; }
-window.closeSupport = function(){ document.getElementById('supportPopup').style.display = 'none'; }
-
-window.submitTicket = async function(){
-const name=document.getElementById('sname').value;
-const mobile=document.getElementById('smobile').value;
-const product=document.getElementById('sproduct').value;
-const problem=document.getElementById('sproblem').value;
-const trxid=document.getElementById('strxid').value;
-const screenshot=document.getElementById('sscreenshotURL').value;
-
-if(name==""||mobile==""||product=="প্রোডাক্ট সিলেক্ট করুন"||problem==""){alert("নাম, মোবাইল, প্রোডাক্ট, সমস্যা বাধ্যতামূলক");return;}
-
-const ticketId = push(ref(db,'tickets'),{
-name,mobile,product,problem,
-trxid: trxid, 
-screenshot: screenshot,
-status:"Pending",reply:"",repliedBy:"",time:new Date().toLocaleString("bn-BD")
-}).key;
-
-let message = `নতুন সাপোর্ট টিকেট 🔔%0ATicketID: ${ticketId}%0AName: ${name}%0AMobile: ${mobile}%0AProduct: ${product}%0AProblem: ${problem}%0ATrxID: ${trxid}%0AScreenshot: ${screenshot}`;
-window.open(`https://wa.me/${SUPPORT_WHATSAPP}?text=${message}`, '_blank');
-
-const sAdminsSnap = await get(ref(db, 'supportAdmins'));
-if(sAdminsSnap.exists()){ let i=1; sAdminsSnap.forEach(c=>{ let adminMobile = c.val().mobile.replace(/^0/, '88'); setTimeout(()=>{ window.open(`https://wa.me/${adminMobile}?text=${message}`, '_blank'); }, i * 1000); i++; }) }
-
-alert("টিকেট সাবমিট হয়েছে ✅ Admin রিপ্লাই দিলে এখানে দেখতে পাবেন"); 
-closeSupport();
-document.getElementById('sname').value=""; document.getElementById('smobile').value=""; document.getElementById('sproblem').value="";
-document.getElementById('strxid').value=""; document.getElementById('sscreenshotURL').value="";
-loadMyTickets(mobile);
+window.submitSupport = function(){
+const name=document.getElementById('sname').value; const mobile=document.getElementById('smobile').value; const issue=document.getElementById('sissue').value;
+const ticketId = push(ref(db,'supportTickets'),{name,mobile,issue,trxid:document.getElementById('strxid').value,ss:document.getElementById('sscreenshot').value,customerReply:"",time:new Date().toLocaleString("bn-BD")}).key;
+supportAdmins.forEach(c=> window.open(`https://wa.me/${c.mobile}?text=নতুন সাপোর্ট: ${ticketId} - ${issue} - ${mobile}`,'_blank'));
+setTimeout(()=>{ let botMsg = `ধন্যবাদ।%0ADetails দিন: ${window.location.origin}${window.location.pathname}?replySupport=${ticketId}`; window.open(`https://wa.me/${mobile}?text=${botMsg}`,'_blank'); },2000);
+alert("সাপোর্ট টিকেট গেছে"); closePopup('supportPopup');
 }
 
-function loadMyTickets(mobile){
-onValue(ref(db,'tickets'),(s)=>{
-let html="<h4>আমার টিকেট:</h4>";
-s.forEach(c=>{
-if(c.val().mobile==mobile){
-let t = c.val();
-html+=`<div class="reply-box"><b>টিকেট:</b> ${t.problem}<br><b>Status:</b> ${t.status}<br>`;
-if(t.trxid) html+=`<b>TrxID:</b> ${t.trxid}<br>`;
-if(t.screenshot) html+=`<b>স্ক্রিনশট:</b> <a href="${t.screenshot}" target="_blank" style="color:#00aaff">ছবি দেখুন</a><br>`;
-if(t.reply!="") html+=`<b style="color:#00ff88">Admin ${t.repliedBy || 'Admin'} এর রিপ্লাই:</b> ${t.reply}`;
-html+="</div>"
-}});
-document.getElementById('myTickets').innerHTML=html;
-})
-}
+window.loginMainAdmin = ()=>{ if(document.getElementById('adminPass').value=="Niyaz@@@@"){ document.getElementById('adminBody').style.display='block'; }else alert("Wrong Password"); }
+window.loginOrderAdmin = ()=>{ if(document.getElementById('orderAdminPass').value=="niyaz@@"){ document.getElementById('orderAdminBody').style.display='block'; }else alert("Wrong Password"); }
+window.loginSupportAdmin = ()=>{ if(document.getElementById('supportAdminPass').value=="Niyz@@@"){ document.getElementById('supportAdminBody').style.display='block'; }else alert("Wrong Password"); }
+
+window.addAdmin = ()=>{ push(ref(db,'orderAdmins'),{name:document.getElementById('aName').value,mobile:document.getElementById('aMobile').value,bkash:document.getElementById('aBkash').value}); }
+window.addSupportAdmin = ()=>{ push(ref(db,'supportAdmins'),{name:document.getElementById('sAName').value,mobile:document.getElementById('sAMobile').value}); }
 </script>
 </body>
 </html>
